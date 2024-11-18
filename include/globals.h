@@ -23,6 +23,7 @@
                                      // bits de type a 1
 
 typedef struct {
+  int pid;
   short tipo_msg, tam_msg;
   char buf[maxval(short)];
 } msg;
