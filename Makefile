@@ -7,6 +7,7 @@ SRC_DIR := src
 HEADER_DIR := header
 BUILD_DIR := build
 BIN_DIR := bin
+SHARED_SRC_DIR := shared
 
 # Ferramentas para processamento e compilação de ficheiros de código fonte
 CC := gcc
@@ -16,6 +17,8 @@ FORMATTER = clang-format
 # Encontra todos os ficheiros de código fonte 
 PROG1_SRCS := $(wildcard $(PROG1)/$(SRC_DIR)/*.c)
 PROG2_SRCS := $(wildcard $(PROG2)/$(SRC_DIR)/*.c)
+PROG1_SRCS += $(wildcard $(SHARED_SRC_DIR)/*.c)
+PROG2_SRCS += $(wildcard $(SHARED_SRC_DIR)/*.c)
 # Caso o projeto cresca muito, pode ser conveniente compilar ficheiros objeto
 # antes de fazer o seu linking
 PROG1_OBJS := $(patsubst %.c, %.o, $(PROG1_SRCS))
