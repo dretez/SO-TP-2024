@@ -11,7 +11,6 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
   pack->head.tipo_msg = msgtype;
 
   unsigned short offset = 0;
-  snprintf(pack->buf, sizeof(pack->buf), "%s", (char *)&strsSize);
   memcpy(pack->buf, (char *)&strsSize, sizeof(strsSize));
   offset += sizeof(strsSize);
 
@@ -32,12 +31,10 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
 }
 
 void writeSingleValPacket(packet *pack, short msgtype, char *value,
-                          int valuesize) {
+                          short valuesize) {
   pack->head.tipo_msg = msgtype;
-
-  unsigned short offset = 0;
-
-  pack->head.tam_msg = offset;
+  pack->head.tam_msg = valuesize;
+  memcpy(pack->buf, value, valuesize);
 }
 
 void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
