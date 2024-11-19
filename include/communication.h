@@ -21,7 +21,7 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
                            int strsSize);
 
 void writeSingleValPacket(packet *pack, short msgtype, char *value,
-                          int valuesize);
+                          short valuesize);
 
 void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
                     char *username, char *msg);

@@ -42,6 +42,26 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
   pack->head.tipo_msg = msgtype;
 
   unsigned short offset = 0;
+  memcpy(pack->buf + offset, (char *)&msglifetime, sizeof(msglifetime));
+  offset += sizeof(msglifetime);
+
+  int len = strlen(username);
+  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
+  offset += sizeof(len);
+  memcpy(pack->buf + offset, username, len);
+  offset += len;
+
+  len = strlen(topic) <= TAM_NOME_TOPICO ? strlen(topic) : TAM_NOME_TOPICO;
+  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
+  offset += sizeof(len);
+  memcpy(pack->buf + offset, topic, len);
+  offset += len;
+
+  len = strlen(msg) <= TAM_CORPO_MSG ? strlen(topic) : TAM_CORPO_MSG;
+  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
+  offset += sizeof(len);
+  memcpy(pack->buf + offset, msg, len);
+  offset += len;
 
   pack->head.tam_msg = offset;
 }
