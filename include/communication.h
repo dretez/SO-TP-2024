@@ -1,5 +1,8 @@
 #include "globals.h"
 
+#ifndef SHARED_COMMS_H
+#define SHARED_COMMS_H
+
 // Dados mensagens
 #define TAM_NOME_TOPICO 20
 #define TAM_CORPO_MSG 300
@@ -17,11 +20,11 @@ typedef struct {
 
 void writeEmptyPacket(packet *pack, short msgtype);
 
-void writeStringListPacket(packet *pack, short msgtype, char **strs,
-                           int strsSize);
-
 void writeSingleValPacket(packet *pack, short msgtype, char *value,
                           short valuesize);
+
+void writeStringListPacket(packet *pack, short msgtype, char **strs,
+                           int strsSize);
 
 void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
                     char *username, char *msg);
@@ -53,7 +56,7 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
  *        * tópico
  *        * tamanho mensagem
  *        * mensagem
- *    - subscribe / unsubscribe
+ *    - subscribe / unsubscribe <tópico>
  *      * subscrever / desubscrever , criação / destruição de tópicos
  *      * tipos mensagem 2 / 3
  *      * tamanho:
@@ -205,3 +208,5 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
  *    preenche a mensagem com a estrutura previamente descrita de uma mensagem
  *    para os feeds
  */
+
+#endif // !SHARED_COMMS_H

@@ -1,9 +1,15 @@
 #include "../include/communication.h"
-#include <string.h>
 
 void writeEmptyPacket(packet *pack, short msgtype) {
   pack->head.tipo_msg = msgtype;
   pack->head.tam_msg = 0;
+}
+
+void writeSingleValPacket(packet *pack, short msgtype, char *value,
+                          short valuesize) {
+  pack->head.tipo_msg = msgtype;
+  pack->head.tam_msg = valuesize;
+  memcpy(pack->buf, value, valuesize);
 }
 
 void writeStringListPacket(packet *pack, short msgtype, char **strs,
@@ -28,13 +34,6 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
    */
 
   pack->head.tam_msg = offset;
-}
-
-void writeSingleValPacket(packet *pack, short msgtype, char *value,
-                          short valuesize) {
-  pack->head.tipo_msg = msgtype;
-  pack->head.tam_msg = valuesize;
-  memcpy(pack->buf, value, valuesize);
 }
 
 void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,

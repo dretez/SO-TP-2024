@@ -1,4 +1,6 @@
+#include "../../include/communication.h"
 #include "../../include/globals.h"
+#include "../headers/input.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,7 +9,7 @@ int main(int argc, char *argv[]) {
   /****************** VERIFICAÇÃO E TRATAMENTO DE ARGUMENTOS ******************/
 
   if (argc != 2) {
-    printf("Numero de argumentos incorreto\n");
+    printf("[SINTAXE] Numero de argumentos incorreto\n");
     exit(1);
   }
 
@@ -40,23 +42,14 @@ int main(int argc, char *argv[]) {
    * o código mais legível e organizado, será boa ideia escrever o código
    * para cada uma destas funções em ficheiros separados
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  char str[30];
-  do {
-    scanf("%s", str);
-    // p.pid = getpid();
-    // strcpy(p.str, str);
-    // res = write(fd, &p, sizeof(PEDIDO));
-    // if (res == sizeof(PEDIDO)) {
-    //   printf("ENVIEI  ... '%s' - %d ( %d bytes) \n", p.str, p.pid, res);
-    //   res = read(fd_cli, &r, sizeof(RESPOSTA));
-    //   printf("RECEBI... '%s' (%d)\n", r.str, res);
-    // }
-  } while (strcmp(str, "fim") != 0 && strcmp(str, "quit") != 0);
+
   if (0 /*recetor de mensagens?*/) {
+    packet p;
     while (1) {
       /*************************** AGUARDA MENSAGEM ***************************/
 
-      // código...
+      int res = read(fd_cli, &p.head, sizeof(packetHeader));
+      res = read(fd_cli, &p.buf, p.head.tam_msg);
 
       /********************* VERIFICA TÓPICO DE MENSAGEM *********************/
 
@@ -69,10 +62,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (0 /*emissor de mensagens?*/) {
+    char cmd[TAM_CMD_INPUT];
+    packet p;
     while (1) {
       /************** AGUARDA INTRODUÇÃO DE MENSAGEM OU COMANDO **************/
 
-      // código
+      inputcmd(cmd, TAM_CMD_INPUT);
 
       /******************** PROCESSA COMANDOS E MENSAGENS ********************/
 
@@ -80,7 +75,8 @@ int main(int argc, char *argv[]) {
 
       /**************************** ENVIA MENSAGEM ****************************/
 
-      // código
+      p.head.pid = getpid();
+      int res = write(fd, &p, sizeof(packet));
     }
   }
 
