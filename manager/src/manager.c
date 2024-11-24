@@ -20,12 +20,12 @@ int main(int argc, char *argv[]) {
 
   /******************************* INICIA DADOS *******************************/
 
-  uint8_t userCount = 0;
+  short userCount = 0;
   pid_t usersPid[MAX_USERS];
   for (short i = 0; i < MAX_USERS; i++)
     usersPid[i] = -1;
 
-  uint8_t topicCount = 0;
+  short topicCount = 0;
   char topics[MAX_TOPICS][TAM_NOME_TOPICO];
   memset(topics, '\0', sizeof(topics));
 
