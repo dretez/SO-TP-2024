@@ -1,8 +1,6 @@
 #include "../../include/communication.h"
 #include "../../include/globals.h"
 #include "../headers/input.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
 
@@ -76,7 +74,7 @@ int main(int argc, char *argv[]) {
       /**************************** ENVIA MENSAGEM ****************************/
 
       p.head.pid = getpid();
-      int res = write(fd, &p, sizeof(packet));
+      int res = write(fd, &p, packetSize(p));
     }
   }
 

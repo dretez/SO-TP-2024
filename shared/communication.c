@@ -1,5 +1,7 @@
 #include "../include/communication.h"
 
+size_t packetSize(packet p) { return sizeof(packetHeader) + p.head.tam_msg; }
+
 void writeEmptyPacket(packet *pack, short msgtype) {
   pack->head.tipo_msg = msgtype;
   pack->head.tam_msg = 0;

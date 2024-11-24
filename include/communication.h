@@ -9,7 +9,7 @@
 #define TAM_BUF maxval(short)
 
 typedef struct {
-  int pid;
+  pid_t pid;
   unsigned short tipo_msg, tam_msg;
 } packetHeader;
 
@@ -17,6 +17,8 @@ typedef struct {
   packetHeader head;
   char buf[TAM_BUF];
 } packet;
+
+size_t packetSize(packet p);
 
 void writeEmptyPacket(packet *pack, short msgtype);
 
