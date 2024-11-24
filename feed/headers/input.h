@@ -1,4 +1,4 @@
-#include "../../include/globals.h"
+#include "../../include/communication.h"
 #ifndef FEED_INPUT_H
 #define FEED_INPUT_H
 

@@ -7,10 +7,6 @@ void inputcmd(char *cmdbuf, int size) {
    * geralmente permite ter código mais curto.
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  // scanf("%s", cmdbuf);
-
-  // fgets(cmdbuf, size, stdin);
-
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    * Existem 3 tipos de comandos que queremos poder receber:
    *

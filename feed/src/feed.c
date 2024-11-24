@@ -34,6 +34,20 @@ int main(int argc, char *argv[]) {
   fd_cli = open(fifo_cli, O_RDWR);
   fd = open(FIFO_SRV, O_WRONLY);
 
+  /* Dado o tamanho de um packet (~64KB) é preferível alocar um packet no heap
+   * ao invés da stack de forma a evitar um stack overflow.
+   * Outra solução seria diminuir o tamanho do buffer num packet, no entanto,
+   * dado que um tamanho máximo para os usernames ainda não foi definido, é
+   * impossível saber o quão grande um packet precisa de ser. */
+  packet *p = (packet *)malloc(sizeof(packet));
+  if (p == NULL) {
+    printf("[ERRO] Falha ao iniciar pacote de dados");
+    exit(3);
+  }
+
+  /******************** INDICAR EXISTÊNCIA DO COMANDO HELP ********************/
+  // TODO:
+
   /****************** REALIZA O ENVIO E RECEÇÃO DE MENSAGEMS ******************/
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    * A seguinte secção controla o envio e a receção de mensagens. Para manter
@@ -42,12 +56,11 @@ int main(int argc, char *argv[]) {
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
   if (0 /*recetor de mensagens?*/) {
-    packet p;
     while (1) {
       /*************************** AGUARDA MENSAGEM ***************************/
 
-      int res = read(fd_cli, &p.head, sizeof(packetHeader));
-      res = read(fd_cli, &p.buf, p.head.tam_msg);
+      int res = read(fd_cli, &p->head, sizeof(packetHeader));
+      res = read(fd_cli, &p->buf, p->head.tam_msg);
 
       /********************* VERIFICA TÓPICO DE MENSAGEM *********************/
 
@@ -60,21 +73,58 @@ int main(int argc, char *argv[]) {
   }
 
   if (0 /*emissor de mensagens?*/) {
-    char cmd[TAM_CMD_INPUT];
-    packet p;
+    char cmdbuf[TAM_CMD_INPUT];
     while (1) {
       /************** AGUARDA INTRODUÇÃO DE MENSAGEM OU COMANDO **************/
 
-      inputcmd(cmd, TAM_CMD_INPUT);
+      fgets(cmdbuf, TAM_CMD_INPUT, stdin);
 
       /******************** PROCESSA COMANDOS E MENSAGENS ********************/
 
-      // código
+      char cmd[12];
+      sscanf(cmdbuf, "%s", cmd);
+
+      char *offset = strchr(cmdbuf, ' ');
+
+      if (strcmp(cmd, "topics")) {
+        writeEmptyPacket(p, 0);
+      } else if (strcmp(cmd, "exit")) {
+        writeEmptyPacket(p, 4);
+      } else if (strcmp(cmd, "subscribe")) {
+        char topic[TAM_NOME_TOPICO];
+        sscanf(offset + 1, "%s", topic);
+        writeSingleValPacket(p, 2, topic, strlen(topic));
+      } else if (strcmp(cmd, "unsubscribe")) {
+        char topic[TAM_NOME_TOPICO];
+        sscanf(offset + 1, "%s", topic);
+        writeSingleValPacket(p, 3, topic, strlen(topic));
+      } else if (strcmp(cmd, "msg")) {
+        char topic[TAM_NOME_TOPICO];
+        int i;
+        for (i = 0; i < TAM_NOME_TOPICO || offset[i + 1] == ' '; i++)
+          topic[i] = offset[i + 1];
+        topic[i] = '\0';
+
+        offset = strchr(offset + 1, ' ');
+        int duracao;
+        sscanf(offset + 1, "%d", &duracao);
+
+        offset = strchr(offset + 1, ' ');
+        char msg[TAM_CORPO_MSG];
+        sscanf(offset + 1, "%s", msg);
+
+        writeMsgPacket(p, 1, duracao, topic, argv[1], msg);
+      } else if (strcmp(cmd, "help")) {
+        // dizer comandos que existem;
+        // printfs
+      } else {
+        printf("Comando não reconhecido");
+      }
 
       /**************************** ENVIA MENSAGEM ****************************/
 
-      p.head.pid = getpid();
-      int res = write(fd, &p, packetSize(p));
+      p->head.pid = getpid();
+      int res = write(fd, p, packetSize(*p));
     }
   }
 

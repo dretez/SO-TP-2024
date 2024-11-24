@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     usersPid[i] = -1;
 
   short topicCount = 0;
-  char topics[MAX_TOPICS][TAM_NOME_TOPICO];
+  char topics[MAX_TOPICS][TAM_NOME_TOPICO + 1];
   memset(topics, '\0', sizeof(topics));
 
   pid_t topicSubs[MAX_TOPICS];
