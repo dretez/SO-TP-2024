@@ -66,35 +66,34 @@ int main(int argc, char *argv[]) {
 
       char topico[TAM_NOME_TOPICO];
 
-      switch (p->head.tipo_msg ) {
-        case 0: // Listagem de tópicos (topics)
-          printf("Tópicos disponíveis:\n");
+      switch (p->head.tipo_msg) {
+      case 0: // Listagem de tópicos (topics)
+        printf("Tópicos disponíveis:\n");
         printf("%s\n", p->buf);
         break;
 
-        case 1: // Mensagem recebida de um tópico subscrito
-          printf("Nova mensagem no tópico '%s' : %s\n",
-                 topico, p->buf);
+      case 1: // Mensagem recebida de um tópico subscrito
+        printf("Nova mensagem no tópico '%s' : %s\n", topico, p->buf);
         break;
 
-        case 2: // Confirmação de subscrição
-          printf("Subscreveu o tópico: %s\n", topico);
+      case 2: // Confirmação de subscrição
+        printf("Subscreveu o tópico: %s\n", topico);
         break;
 
-        case 3: // Confirmação de cancelamento de subscrição
-          printf("Cancelou a subscrição do tópico: %s\n", topico);
+      case 3: // Confirmação de cancelamento de subscrição
+        printf("Cancelou a subscrição do tópico: %s\n", topico);
         break;
 
-        case 4: // Pedido de saída (exit)
-          printf(" Enviando o pedido para sair.");
-          printf("A sair...\n");
+      case 4: // Pedido de saída (exit)
+        printf(" Enviando o pedido para sair.");
+        printf("A sair...\n");
         close(fd_cli);
         unlink(fifo_cli);
         exit(0);
         break;
 
-        default: // Tipo de mensagem desconhecido
-          printf("[ERRO] Tipo de mensagem desconhecido: %d\n", p->head.tipo_msg);
+      default: // Tipo de mensagem desconhecido
+        printf("[ERRO] Tipo de mensagem desconhecido: %d\n", p->head.tipo_msg);
         break;
       }
       /*************************** MOSTRA MENSAGEM ***************************/
@@ -147,9 +146,12 @@ int main(int argc, char *argv[]) {
         writeMsgPacket(p, 1, duracao, topic, argv[1], msg);
       } else if (strcmp(cmd, "help")) {
         printf("\ntopics - Mostrar uma lista com todos os tópicos ");
-        printf("\nmsg <topico> <duração> <mensagem> - Enviar mensagem para um determinado tópico");
-        printf("\nsubscribe <nome do tópico> - Subscrever um determinado tópico");
-        printf("\nunsubscribe <nome do topico> - Deixar de subscrever um determinado tópico");
+        printf("\nmsg <topico> <duração> <mensagem> - Enviar mensagem para um "
+               "determinado tópico");
+        printf(
+            "\nsubscribe <nome do tópico> - Subscrever um determinado tópico");
+        printf("\nunsubscribe <nome do topico> - Deixar de subscrever um "
+               "determinado tópico");
         printf("\nexit - Sair\n ");
       } else {
         printf("Comando não reconhecido");
