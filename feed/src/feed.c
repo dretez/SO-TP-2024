@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     exit(3);
   }
 
-  char *fifo_cli;
+  char fifo_cli[20];
   sprintf(fifo_cli, FIFO_CLI, getpid());
   mkfifo(fifo_cli, 0600);
 
