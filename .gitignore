@@ -3,7 +3,7 @@ bin/
 build/
 
 # CLion files
-.idea/
+*.idea/
 
 # Prerequisites
 *.d
