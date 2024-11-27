@@ -62,7 +62,7 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
 }
 
 void writeErrorPacket(packet *p, int errCode) {
-  p->head.tipo_msg = 17;
+  p->head.tipo_msg = P_TYPE_MNGR_ERROR;
   p->head.tam_msg = sizeof(int);
   memcpy(p->buf, &errCode, sizeof(int));
 }

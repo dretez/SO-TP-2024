@@ -15,6 +15,30 @@
 #define P_ERR_INVALID_TOPIC 4
 #define P_ERR_NOT_SUBBED 5
 
+// Tipos de mensagem
+// mensagens do feed
+#define P_TYPE_USER_TOPIC 0
+#define P_TYPE_USER_MSG 1
+#define P_TYPE_USER_SUB 2
+#define P_TYPE_USER_UNSUB 3
+#define P_TYPE_USER_EXIT 4
+// mensagens do manager: comandos do admin
+#define P_TYPE_ADMN_USERS 5
+#define P_TYPE_ADMN_RMUSR 6
+#define P_TYPE_ADMN_TOPIC 7
+#define P_TYPE_ADMN_SHWTOPIC 8
+#define P_TYPE_ADMN_LOCK 9
+#define P_TYPE_ADMN_UNLOCK 10
+#define P_TYPE_ADMN_CLOSE 11
+// mensagens do manager: respostas
+#define P_TYPE_MNGR_MSG 12
+#define P_TYPE_MNGR_RMUSR 13
+#define P_TYPE_MNGR_TOPIC 14
+#define P_TYPE_MNGR_LOCKD 15
+#define P_TYPE_MNGR_USERS 16
+#define P_TYPE_MNGR_ERROR 17
+#define P_TYPE_MNGR_SUCCESS 18
+
 typedef struct {
   pid_t pid;
   unsigned short tipo_msg, tam_msg;
