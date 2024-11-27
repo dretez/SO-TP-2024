@@ -1,6 +1,5 @@
 #include "../headers/manager.h"
-#include "../../include/communication.h"
-#include <string.h>
+#include "../headers/dados.h"
 
 int main(int argc, char *argv[]) {
 
@@ -16,34 +15,8 @@ int main(int argc, char *argv[]) {
 
   /******************************* INICIA DADOS *******************************/
 
-  short userCount = 0;
-  pid_t usersPid[MAX_USERS];
-  for (short i = 0; i < MAX_USERS; i++)
-    usersPid[i] = -1;
-  char *usernames[MAX_USERS];
-  for (short i = 0; i < MAX_USERS; i++)
-    usernames[i] = NULL;
-
-  short topicCount = 0;
-  char topics[MAX_TOPICS][TAM_NOME_TOPICO + 1];
-  memset(topics, '\0', sizeof(topics));
-
-  pid_t topicSubs[MAX_TOPICS][MAX_USERS];
-  for (short i = 0; i < MAX_TOPICS; i++) {
-    for (short j = 0; j < MAX_TOPICS; j++) {
-      topicSubs[i][j] = -1;
-    }
-  }
-  unsigned short nTopicSubs[MAX_TOPICS];
-  for (short i = 0; i < MAX_TOPICS; i++) {
-    nTopicSubs[i] = 0;
-  }
-
-  persistMsg persistMSGs[MAX_TOPICS][MAX_PERSISTENT_MSGS];
-  for (short i = 0; i < MAX_TOPICS * MAX_PERSISTENT_MSGS; i++) {
-    persistMSGs[i]->lifetime = 0;
-    persistMSGs[i]->msg = NULL;
-  }
+  managerData d;
+  initManData(&d);
 
   /* Dado o tamanho de um packet (~64KB) é preferível alocar um packet no heap
    * ao invés da stack de forma a evitar um stack overflow.
@@ -75,70 +48,92 @@ int main(int argc, char *argv[]) {
 
       switch (p->head.tipo_msg) {
       case 0: // Pedido de lista de tópicos
+      {
         p->head.tipo_msg = 14;
-        int offset;
-        for (int i = 0, offset = 0; i < topicCount;
-             i++, offset += strlen(topics[i]) + 1)
-          strcpy(&p->buf[offset], topics[i]);
+        unsigned short offset;
+        for (int i = 0, offset = 0; i < d.ntopics;
+             offset += strlen(d.topics[i++].name) + 1)
+          strcpy(&p->buf[offset], d.topics[i].name);
         p->head.tam_msg = offset;
         break;
-
-      case 1: // Recebida mensagem para um tópico
-        // muda o tipo de msg para 12
-        // encontra o nome do tópico no buffer:
-        /* para encontrar o tópico, devemos fazer as seguintes deslocações a
-         * partir do ínicio do buffer: o tamanho de 1 int (4 bytes) (tempo de
-         * vida da msg) o tamanho de 1 int + o valor indicado por esse int (nome
-         * e tam) o tamanho de 1 int (indicador de tamanho do tópico) o último
-         * int indica o tamanho do tópico, pelo que devemos copiar apenas o
-         * número de chars indicados por esse int para um array que armazene o
-         * nome do tópico
-         * */
-        // redireciona mensagem a todos os utilizadores que estejam subscritos
-        // nesse tópico
+      }
+      case 1: { // Recebida mensagem para um tópico
+        p->head.tipo_msg = 12;
         break;
-
-      case 2: // Pedido de subscrição a um tópico
-          ;
-        int i;
-        for (i = 0; i < topicCount; i++) {
-          if (!strcmp(topics[i], p->buf /*tópico*/) &&
-              nTopicSubs[i] < MAX_USERS) {
-            topicSubs[i][nTopicSubs[i]++] = p->head.pid;
-            break;
-          }
+      }
+      case 2: { // Pedido de subscrição a um tópico
+        topic *topico = getTopic(d.topics, d.ntopics, p->buf);
+        if (topico == NULL && addTopic(&d, p->buf) == 1) {
+          writeErrorPacket(p, P_ERR_TOPIC_LIST_FULL);
+          break;
         }
-        if (i == topicCount && topicCount < MAX_TOPICS) {
-          strcpy(topics[i], p->buf);
-          topicSubs[i][nTopicSubs[i]++] = p->head.pid;
+        if (subscribeUser(topico, p->head.pid)) {
+          writeErrorPacket(p, P_ERR_ALREADY_SUBBED);
+          break;
         }
         p->head.tipo_msg = 18;
         p->head.tam_msg = 0;
         break;
-
-      case 3: // Pedido de remoção de subscrição a um tópico
-        // recebe nome do tópico do p->buf
-        // remove utilizador desse tópico
-        // se não houverem utilizadores ou mensagens persistentes no tópico,
-        // apaga-o envia confirmação de remoção de subscrição
+      }
+      case 3: { // Pedido de remoção de subscrição a um tópico
+        topic *topico = getTopic(d.topics, d.ntopics, p->buf);
+        if (topico == NULL) {
+          writeErrorPacket(p, P_ERR_INVALID_TOPIC);
+          break;
+        }
+        if (unsubscribeUser(topico, p->head.pid)) {
+          writeErrorPacket(p, P_ERR_NOT_SUBBED);
+          break;
+        }
         p->head.tipo_msg = 18;
         p->head.tam_msg = 0;
         break;
-
+      }
       case 4: // Pedido de saída de um cliente feed
         // remove utilizador da lista de utilizadores connectados
         // envia informação a todos os utilizadores que o utilizador saiu
         break;
 
       default: // Tipo de mensagem desconhecido
-        p->head.tipo_msg = 17;
-        p->head.tam_msg = sizeof(int);
-        int errorMsg = 0;
-        memcpy(p->buf, &errorMsg, sizeof(errorMsg));
+        writeErrorPacket(p, P_ERR_GENERIC);
         break;
       }
 
-      // envia resposta para feeds
+      /************************ ENVIA PACOTE AOS FEEDS ************************/
+
+      switch (p->head.tipo_msg) {
+      case 12: {
+        int offset = sizeof(int);
+        offset += strlen(&p->buf[offset]) + 1;
+        char topico[TAM_NOME_TOPICO];
+        strcpy(topico, &p->buf[offset]);
+        if (getTopic(d.topics, d.ntopics, topico) == NULL)
+          addTopic(&d, topico);
+        topic *t = getTopic(d.topics, d.ntopics, topico);
+        for (int i = 0; i < t->nsubs; i++) {
+          char fifo_cli[30];
+          sprintf(fifo_cli, FIFO_CLI, t->subs[i]);
+          int fd_cli = open(fifo_cli, O_WRONLY);
+
+          int res = write(fd_cli, p, packetSize(*p));
+
+          close(fd_cli);
+        }
+      }
+      case 13: {
+        // envia a todos os utilizadores ligados
+        // d.users contém a lista de utilizadores
+      }
+      default: {
+        char fifo_cli[30];
+        sprintf(fifo_cli, FIFO_CLI, p->head.pid);
+        int fd_cli = open(fifo_cli, O_WRONLY);
+
+        int res = write(fd_cli, p, packetSize(*p));
+
+        close(fd_cli);
+      }
+      }
     }
 
     if (0 /*emissor de mensagens?*/) {

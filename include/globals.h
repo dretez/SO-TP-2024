@@ -17,6 +17,10 @@
 #define FIFO_SRV "srv_pipe"
 #define FIFO_CLI "cli_%d"
 
+// Limites
+#define TAM_NOME_TOPICO 20 + 1
+#define TAM_CORPO_MSG 300 + 1
+
 // Macros
 #define maxval(type)                                                           \
   (1 << sizeof(type) * CHAR_BIT) - 1 // obtém o valor maximo permitido por type

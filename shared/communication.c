@@ -18,18 +18,12 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
                            int strsSize) {
   pack->head.tipo_msg = msgtype;
 
-  unsigned short offset = 0;
-  memcpy(pack->buf, (char *)&strsSize, sizeof(strsSize));
-  offset += sizeof(strsSize);
+  unsigned short offset;
 
-  for (int i = 0, len = strlen(strs[i]);
-       i < strsSize && offset + len + sizeof(len) < TAM_BUF;
-       i++, len = strlen(strs[i])) {
-    memcpy(pack->buf + offset, (char *)&len, sizeof(len));
-    offset += sizeof(len);
-    memcpy(pack->buf + offset, strs[i], len);
-    offset += len;
-  }
+  for (int i = 0, offset = 0;
+       i < strsSize && offset + strlen(strs[i]) < TAM_BUF;
+       offset += strlen(strs[i++]))
+    strcpy(&pack->buf[offset], strs[i]);
 
   /* TODO: deal with the possibility that not every string was copied due to
    * the final offset going over the allocated size for the buffer
@@ -65,4 +59,10 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
   offset += len;
 
   pack->head.tam_msg = offset;
+}
+
+void writeErrorPacket(packet *p, int errCode) {
+  p->head.tipo_msg = 17;
+  p->head.tam_msg = sizeof(int);
+  memcpy(p->buf, &errCode, sizeof(int));
 }

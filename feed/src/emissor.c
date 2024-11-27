@@ -1,4 +1,5 @@
 #include "../headers/emissor.h"
+#include <string.h>
 
 void processCmd(packet *p, char *input, char *username) {
   char cmd[12];
@@ -12,16 +13,16 @@ void processCmd(packet *p, char *input, char *username) {
     writeEmptyPacket(p, 4);
   } else if (strcmp(cmd, "subscribe")) {
     char topic[TAM_NOME_TOPICO];
-    sscanf(offset + 1, "%s", topic);
+    strcpy(topic, offset + 1);
     writeSingleValPacket(p, 2, topic, strlen(topic));
   } else if (strcmp(cmd, "unsubscribe")) {
     char topic[TAM_NOME_TOPICO];
-    sscanf(offset + 1, "%s", topic);
+    strcpy(topic, offset + 1);
     writeSingleValPacket(p, 3, topic, strlen(topic));
   } else if (strcmp(cmd, "msg")) {
     char topic[TAM_NOME_TOPICO];
     int i;
-    for (i = 0; i < TAM_NOME_TOPICO || offset[i + 1] == ' '; i++)
+    for (i = 0; i < TAM_NOME_TOPICO - 1 || offset[i + 1] == ' '; i++)
       topic[i] = offset[i + 1];
     topic[i] = '\0';
 

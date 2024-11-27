@@ -4,9 +4,16 @@
 #define SHARED_COMMS_H
 
 // Dados mensagens
-#define TAM_NOME_TOPICO 20
-#define TAM_CORPO_MSG 300
 #define TAM_BUF maxval(short)
+
+// Códigos de erro
+// #define P_ERR_ 0
+#define P_ERR_GENERIC 0
+#define P_ERR_SRV_FULL 1
+#define P_ERR_TOPIC_LIST_FULL 2
+#define P_ERR_ALREADY_SUBBED 3
+#define P_ERR_INVALID_TOPIC 4
+#define P_ERR_NOT_SUBBED 5
 
 typedef struct {
   pid_t pid;
@@ -30,6 +37,8 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
 
 void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
                     char *username, char *msg);
+
+void writeErrorPacket(packet *p, int errCode);
 
 /*
  ************************ TIPOS DE MENSAGENS / COMANDOS ************************
