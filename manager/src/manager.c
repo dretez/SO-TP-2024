@@ -34,16 +34,16 @@ int main(int argc, char *argv[]) {
 
     if (0 /*servidor?*/) {
       /**************************** AGUARDA PACOTE ****************************/
-
       read(fd, &p->head, sizeof(packetHeader));
       read(fd, &p->buf, p->head.tam_msg);
 
       /*************************** PROCESSA PACOTE ***************************/
-
-      processPacket(p, &d);
+      if (processPacket(p, &d))
+        // TODO: maybe send a message to all the feeds informing the server's
+        // closing
+        goto exit;
 
       /************************ ENVIA PACOTE AOS FEEDS ************************/
-
       answer(p, &d);
     }
 
@@ -59,6 +59,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
+exit:
+  // TODO: clean the managerData struct before exiting, as this struct contains
+  // allocated memory that needs to be free()'d
   free(p);
   close(fd);
   unlink(FIFO_SRV);

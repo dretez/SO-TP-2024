@@ -1,8 +1,9 @@
 #include "../../include/communication.h"
 #include "../../include/globals.h"
 #include "../headers/emissor.h"
-#include "../headers/input.h"
 #include "../headers/recetor.h"
+
+#define TAM_CMD_INPUT 1024
 
 int main(int argc, char *argv[]) {
 
@@ -16,12 +17,6 @@ int main(int argc, char *argv[]) {
   char *nome = argv[1];
 
   /************ INICIA PROCESSOS PARA RECEÇÃO E ENVIO DE MENSAGEMS ************/
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * Dada a necessidade de poder receber mensagens a qualquer momento, mesmo
-   * enquanto o utilizador está a escrever uma mensagem, poderá ser necessário
-   * fazer aqui um fork() de forma a criar um programa que trate do envio de
-   * mensagens e outro que trate da receção
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
   if (access(FIFO_SRV, F_OK) != 0) {
     printf("[ERRO] Servidor nao esta a correr!\n");
@@ -50,11 +45,6 @@ int main(int argc, char *argv[]) {
   // TODO:
 
   /****************** REALIZA O ENVIO E RECEÇÃO DE MENSAGEMS ******************/
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * A seguinte secção controla o envio e a receção de mensagens. Para manter
-   * o código mais legível e organizado, será boa ideia escrever o código
-   * para cada uma destas funções em ficheiros separados
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
   while (1) {
     printf(">>>");
@@ -74,7 +64,8 @@ int main(int argc, char *argv[]) {
       read(fd_cli, &p->head, sizeof(packetHeader));
       read(fd_cli, &p->buf, p->head.tam_msg);
 
-      processPacket(p);
+      if (processPacket(p))
+        goto exit;
     }
 
     if (FD_ISSET(0, &fds)) {
@@ -89,10 +80,7 @@ int main(int argc, char *argv[]) {
   }
 
   /***************************** TERMINA PROGRAMA *****************************/
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   * Caso um dos processos (recetor ou emissor) tenha terminado, ambos os
-   * processos são terminados.
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+exit:
   printf("FIM! \n");
   close(fd);
   close(fd_cli);
