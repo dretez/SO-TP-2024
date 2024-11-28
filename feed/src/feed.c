@@ -2,6 +2,7 @@
 #include "../../include/globals.h"
 #include "../headers/emissor.h"
 #include "../headers/input.h"
+#include "../headers/recetor.h"
 
 int main(int argc, char *argv[]) {
 
@@ -70,14 +71,10 @@ int main(int argc, char *argv[]) {
       continue;
 
     if (FD_ISSET(fd_cli, &fds)) {
-      int res = read(fd_cli, &p->head, sizeof(packetHeader));
-      res += read(fd_cli, &p->buf, p->head.tam_msg);
+      read(fd_cli, &p->head, sizeof(packetHeader));
+      read(fd_cli, &p->buf, p->head.tam_msg);
 
-      switch (p->head.tipo_msg) {
-      default:
-        printf("[ERRO] Tipo de mensagem desconhecido: %d\n", p->head.tipo_msg);
-        break;
-      }
+      processPacket(p);
     }
 
     if (FD_ISSET(0, &fds)) {

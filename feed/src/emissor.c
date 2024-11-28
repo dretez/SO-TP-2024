@@ -1,5 +1,4 @@
 #include "../headers/emissor.h"
-#include <string.h>
 
 void processCmd(packet *p, char *input, char *username) {
   char cmd[12];
