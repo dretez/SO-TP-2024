@@ -1,7 +1,4 @@
-#include "../../include/communication.h"
-#include "../../include/globals.h"
-#include "../headers/emissor.h"
-#include "../headers/recetor.h"
+#include "../headers/feed.h"
 
 #define TAM_CMD_INPUT 1024
 

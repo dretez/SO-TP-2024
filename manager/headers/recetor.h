@@ -1,5 +1,6 @@
 #ifndef MANAGER_RECETOR_H
 #define MANAGER_RECETOR_H
+
 #include "../../include/communication.h"
 #include "dados.h"
 

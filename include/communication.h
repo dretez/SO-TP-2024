@@ -1,10 +1,20 @@
-#include "globals.h"
-
 #ifndef SHARED_COMMS_H
 #define SHARED_COMMS_H
 
+#include <limits.h>
+#include <stdint.h>
+#include <unistd.h>
+
+// Macros
+#define maxval(type)                                                           \
+  (1 << sizeof(type) * CHAR_BIT) - 1 // obtém o valor maximo permitido por type
+                                     // ou o equivalente a colocar todos os
+                                     // bits de type a 1
+
+// #include "globals.h"
+
 // Dados mensagens
-#define TAM_BUF maxval(short)
+#define TAM_BUF maxval(uint16_t)
 
 // Códigos de erro
 // #define P_ERR_ 0
@@ -41,7 +51,8 @@
 
 typedef struct {
   pid_t pid;
-  unsigned short tipo_msg, tam_msg;
+  unsigned short tipo_msg;
+  uint16_t tam_msg;
 } packetHeader;
 
 typedef struct {

@@ -1,6 +1,4 @@
 #include "../headers/manager.h"
-#include "../headers/dados.h"
-#include "../headers/recetor.h"
 
 int main(int argc, char *argv[]) {
 
@@ -19,52 +17,65 @@ int main(int argc, char *argv[]) {
   managerData d;
   initManData(&d);
 
+  int ext_err = 0;
+
   /* Dado o tamanho de um packet (~64KB) é preferível alocar um packet no heap
    * ao invés da stack de forma a evitar um stack overflow.
    * Outra solução seria diminuir o tamanho do buffer num packet, no entanto,
    * dado que um tamanho máximo para os usernames ainda não foi definido, é
    * impossível saber o quão grande um packet precisa de ser. */
-  packet *p = (packet *)malloc(sizeof(packet));
-  if (p == NULL) {
+  packet *p_srv = (packet *)malloc(sizeof(packet));
+  if (p_srv == NULL) {
     printf("[ERRO] Falha ao iniciar pacote de dados");
-    exit(3);
+    ext_err = 3;
+    goto exit1;
   }
 
+  packet *p_admn = (packet *)malloc(sizeof(packet));
+  if (p_srv == NULL) {
+    printf("[ERRO] Falha ao iniciar pacote de dados");
+    ext_err = 3;
+    goto exit2;
+  }
+
+  int cont = 1;
+
+  TDATA t;
+  t.p = p_admn;
+  t.cont = &cont;
+
+  pthread_t th[2];
+
+  pthread_create(&th[0], NULL, admin_thread, (void *)&t);
+
+  pthread_create(&th[1], NULL, counter_thread, (void *)&cont);
+
+  /********************************* SERVIDOR *********************************/
   while (1) {
+    /**************************** AGUARDA PACOTE ****************************/
+    read(fd, &p_srv->head, sizeof(packetHeader));
+    read(fd, &p_srv->buf, p_srv->head.tam_msg);
 
-    if (0 /*servidor?*/) {
-      /**************************** AGUARDA PACOTE ****************************/
-      read(fd, &p->head, sizeof(packetHeader));
-      read(fd, &p->buf, p->head.tam_msg);
+    /*************************** PROCESSA PACOTE ***************************/
+    if (processPacket(p_srv, &d))
+      // TODO: maybe send a message to all the feeds informing the server's
+      // closing
+      goto exit;
 
-      /*************************** PROCESSA PACOTE ***************************/
-      if (processPacket(p, &d))
-        // TODO: maybe send a message to all the feeds informing the server's
-        // closing
-        goto exit;
-
-      /************************ ENVIA PACOTE AOS FEEDS ************************/
-      answer(p, &d);
-    }
-
-    if (0 /*administrador?*/) {
-      char fifo_cli[30];
-      sprintf(fifo_cli, FIFO_CLI, p->head.pid);
-      int fd_cli = open(fifo_cli, O_WRONLY);
-
-      // prepara pacote a ser enviado
-
-      int res = write(fd_cli, p, packetSize(*p));
-      close(fd_cli);
-    }
+    /************************ ENVIA PACOTE AOS FEEDS ************************/
+    answer(p_srv, &d);
   }
 
 exit:
+  cont = 0;
+  pthread_join(th[0], NULL);
+  pthread_join(th[1], NULL);
   // TODO: clean the managerData struct before exiting, as this struct contains
   // allocated memory that needs to be free()'d
-  free(p);
+exit2:
+  free(p_srv);
+exit1:
   close(fd);
   unlink(FIFO_SRV);
-  printf("FIM \n");
-  exit(0);
+  exit(ext_err);
 }

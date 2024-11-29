@@ -2,7 +2,12 @@
 #define MANAGER_DADOS_H
 
 #include "../../include/globals.h"
-#include "manager.h"
+#include "../../include/limites.h"
+
+// Limites predefinidos
+#define MAX_USERS 10
+#define MAX_TOPICS 20
+#define MAX_PERSISTENT_MSGS 5
 
 typedef struct {
   int lifetime;

@@ -26,17 +26,19 @@ PROG2_OBJS := $(PROG2_SRCS:$(PROG2_SRC_DIR)/%.c=$(BUILD_DIR)/%.o) $(SHARED_OBJS)
 CC := gcc
 FORMATTER = clang-format
 
+CFLAGS := -Wall -lpthread
+
 
 all: $(BUILD_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
 
 
 $(BIN_DIR)/$(PROG1): $(PROG1_OBJS) $(SHARED_OBJS)
 	@echo A linkar $(PROG1)
-	@$(CC) $(PROG1_OBJS) -o $@
+	@$(CC) $(CFLAGS) $(PROG1_OBJS) -o $@
 
 $(BIN_DIR)/$(PROG2): $(PROG2_OBJS) $(SHARED_OBJS)
 	@echo A linkar $(PROG2)
-	@$(CC) $(PROG2_OBJS) -o $@
+	@$(CC) $(CFLAGS) $(PROG2_OBJS) -o $@
 
 $(BUILD_DIR)/%.o: $(PROG1_SRC_DIR)/%.c
 	@echo A compilar $@
@@ -63,3 +65,4 @@ $(BIN_DIR):
 clean:
 	@echo "A remover diretórios build e bin"
 	@rm -rf $(BUILD_DIR) $(BIN_DIR)
+	@rm srv_pipe cli_*
