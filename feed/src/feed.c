@@ -1,7 +1,5 @@
 #include "../headers/feed.h"
 
-#define TAM_CMD_INPUT 1024
-
 int main(int argc, char *argv[]) {
 
   /****************** VERIFICAÇÃO E TRATAMENTO DE ARGUMENTOS ******************/
