@@ -1,4 +1,5 @@
 #include "../headers/feed.h"
+#include <stdio.h>
 
 int main(int argc, char *argv[]) {
 
@@ -17,13 +18,13 @@ int main(int argc, char *argv[]) {
     printf("[ERRO] Servidor nao esta a correr!\n");
     exit(3);
   }
+  int fd = open(FIFO_SRV, O_WRONLY);
 
   char fifo_cli[20];
   sprintf(fifo_cli, FIFO_CLI, getpid());
   mkfifo(fifo_cli, 0600);
 
   int fd_cli = open(fifo_cli, O_RDWR);
-  int fd = open(FIFO_SRV, O_WRONLY);
 
   /* Dado o tamanho de um packet (~64KB) é preferível alocar um packet no heap
    * ao invés da stack de forma a evitar um stack overflow.
@@ -32,7 +33,7 @@ int main(int argc, char *argv[]) {
    * impossível saber o quão grande um packet precisa de ser. */
   packet *p = (packet *)malloc(sizeof(packet));
   if (p == NULL) {
-    printf("[ERRO] Falha ao iniciar pacote de dados");
+    printf("[ERRO] Falha ao iniciar pacote de dados\n");
     exit(3);
   }
 
@@ -67,16 +68,17 @@ int main(int argc, char *argv[]) {
       char cmdbuf[TAM_CMD_INPUT];
       fgets(cmdbuf, TAM_CMD_INPUT, stdin);
 
-      processCmd(p, cmdbuf, nome);
-
-      p->head.pid = getpid();
-      int res = write(fd, p, packetSize(*p));
+      if (!processCmd(p, cmdbuf, nome)) {
+        p->head.pid = getpid();
+        int res = write(fd, p, packetSize(*p));
+      }
     }
   }
 
   /***************************** TERMINA PROGRAMA *****************************/
 exit:
   printf("FIM! \n");
+  free(p);
   close(fd);
   close(fd_cli);
   unlink(fifo_cli);

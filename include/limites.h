@@ -3,5 +3,6 @@
 
 #define TAM_NOME_TOPICO 20 + 1
 #define TAM_CORPO_MSG 300 + 1
+#define TAM_CMD_INPUT 1024
 
 #endif // INCLUDE_INCLUDE_LIMITES_H_

@@ -15,4 +15,8 @@
 #define FIFO_SRV "srv_pipe"
 #define FIFO_CLI "cli_%d"
 
+int wordlen(char *wrd);
+int nextword(char *str, int offset, int size);
+int wordncpy(char *dest, char *orig, int size);
+
 #endif // !SHARED_GLOBALS_H

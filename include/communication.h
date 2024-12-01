@@ -1,8 +1,10 @@
 #ifndef SHARED_COMMS_H
 #define SHARED_COMMS_H
 
+#include "limites.h"
 #include <limits.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 
 // Macros

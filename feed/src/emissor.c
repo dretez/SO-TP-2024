@@ -1,48 +1,99 @@
 #include "../headers/emissor.h"
 
-void processCmd(packet *p, char *input, char *username) {
+int processCmd(packet *p, char *input, char *username) {
   char cmd[12];
-  sscanf(input, "%s", cmd);
-
-  char *offset = strchr(input, ' ');
-
-  if (strcmp(cmd, "topics")) {
-    writeEmptyPacket(p, 0);
-  } else if (strcmp(cmd, "exit")) {
-    writeEmptyPacket(p, 4);
-  } else if (strcmp(cmd, "subscribe")) {
-    char topic[TAM_NOME_TOPICO];
-    strcpy(topic, offset + 1);
-    writeSingleValPacket(p, 2, topic, strlen(topic));
-  } else if (strcmp(cmd, "unsubscribe")) {
-    char topic[TAM_NOME_TOPICO];
-    strcpy(topic, offset + 1);
-    writeSingleValPacket(p, 3, topic, strlen(topic));
-  } else if (strcmp(cmd, "msg")) {
-    char topic[TAM_NOME_TOPICO];
-    int i;
-    for (i = 0; i < TAM_NOME_TOPICO - 1 || offset[i + 1] == ' '; i++)
-      topic[i] = offset[i + 1];
-    topic[i] = '\0';
-
-    offset = strchr(offset + 1, ' ');
-    int duracao;
-    sscanf(offset + 1, "%d", &duracao);
-
-    offset = strchr(offset + 1, ' ');
-    char msg[TAM_CORPO_MSG];
-    sscanf(offset + 1, "%s", msg);
-
-    writeMsgPacket(p, 1, duracao, topic, username, msg);
-  } else if (strcmp(cmd, "help")) {
-    printf("\ntopics - Mostrar uma lista com todos os tópicos ");
-    printf("\nmsg <topico> <duração> <mensagem> - Enviar mensagem para um "
-           "determinado tópico");
-    printf("\nsubscribe <nome do tópico> - Subscrever um determinado tópico");
-    printf("\nunsubscribe <nome do topico> - Deixar de subscrever um "
-           "determinado tópico");
-    printf("\nexit - Sair\n ");
+  int offset = 0;
+  if (input[0] == ' ') {
+    offset = nextword(input, 0, TAM_CMD_INPUT);
+    offset = offset == -1 ? 0 : offset;
+    wordncpy(cmd, &input[offset], 12);
   } else {
-    printf("Comando não reconhecido");
+    wordncpy(cmd, input, 12);
   }
+
+  if (!strcmp(cmd, "topics")) {
+    writeEmptyPacket(p, P_TYPE_USER_TOPIC);
+
+  } else if (!strcmp(cmd, "exit")) {
+    writeEmptyPacket(p, P_TYPE_USER_EXIT);
+
+  } else if (!strcmp(cmd, "subscribe")) {
+    offset = nextword(input, offset, TAM_CMD_INPUT);
+    if (offset == -1) {
+      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_SUB);
+      return -1;
+    }
+    if (wordlen(&input[offset]) >= TAM_NOME_TOPICO) {
+      printf("Nome de tópico muito longo\n");
+      return -1;
+    }
+    char topic[TAM_NOME_TOPICO];
+    wordncpy(topic, &input[offset], TAM_NOME_TOPICO);
+    writeSingleValPacket(p, P_TYPE_USER_SUB, topic, strlen(topic));
+
+  } else if (!strcmp(cmd, "unsubscribe")) {
+    offset = nextword(input, offset, TAM_CMD_INPUT);
+    if (offset == -1) {
+      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_UNSUB);
+      return -1;
+    }
+    if (wordlen(&input[offset]) >= TAM_NOME_TOPICO) {
+      printf("Nome de tópico muito longo\n");
+      return -1;
+    }
+    char topic[TAM_NOME_TOPICO];
+    wordncpy(topic, &input[offset], TAM_NOME_TOPICO);
+    writeSingleValPacket(p, P_TYPE_USER_UNSUB, topic, strlen(topic));
+
+  } else if (!strcmp(cmd, "msg")) {
+    offset = nextword(input, offset, TAM_CMD_INPUT);
+    if (offset == -1) {
+      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_MSG);
+      return -1;
+    }
+    if (wordlen(&input[offset]) >= TAM_NOME_TOPICO) {
+      printf("Nome de tópico muito longo\n");
+      return -1;
+    }
+    char topic[TAM_NOME_TOPICO];
+    wordncpy(topic, &input[offset], TAM_NOME_TOPICO);
+
+    offset = nextword(input, offset, TAM_CMD_INPUT);
+    if (offset == -1) {
+      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_MSG);
+      return -1;
+    }
+    int duracao = atoi(&input[offset]);
+    duracao = duracao > 0 ? duracao : 0;
+
+    offset = nextword(input, offset, TAM_CMD_INPUT);
+    if (offset == -1) {
+      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_MSG);
+      return -1;
+    }
+    if (strlen(&input[offset]) > TAM_CORPO_MSG - 1) {
+      printf("Mensagem muito longa\n");
+      return -1;
+    }
+    char msg[TAM_CORPO_MSG];
+    sscanf(&input[offset], "%s", msg);
+
+    writeMsgPacket(p, P_TYPE_USER_MSG, duracao, topic, username, msg);
+
+  } else if (!strcmp(cmd, "help")) {
+    printf("%s - Mostrar uma lista com todos os tópicos\n", FEED_CMD_FMT_TOPIC);
+    printf("%s - Enviar mensagem para um determinado tópico\n",
+           FEED_CMD_FMT_MSG);
+    printf("%s - Subscrever um determinado tópico\n", FEED_CMD_FMT_SUB);
+    printf("%s - Deixar de subscrever um determinado tópico\n",
+           FEED_CMD_FMT_UNSUB);
+    printf("%s - Sair\n", FEED_CMD_FMT_EXIT);
+    return -1;
+
+  } else {
+    printf("Comando não reconhecido\n");
+    return -1;
+  }
+
+  return 0;
 }
