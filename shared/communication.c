@@ -1,4 +1,5 @@
 #include "../include/communication.h"
+#include <string.h>
 
 size_t packetSize(packet p) { return sizeof(packetHeader) + p.head.tam_msg; }
 
@@ -36,27 +37,21 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
                     char *username, char *msg) {
   pack->head.tipo_msg = msgtype;
 
-  unsigned short offset = 0;
-  memcpy(pack->buf + offset, (char *)&msglifetime, sizeof(msglifetime));
-  offset += sizeof(msglifetime);
+  uint16_t offset = 0;
 
-  int len = strlen(username);
-  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
-  offset += sizeof(len);
-  memcpy(pack->buf + offset, username, len);
-  offset += len;
+  if (msglifetime >= 0) {
+    memcpy(&pack->buf[offset], (char *)&msglifetime, sizeof(msglifetime));
+    offset += sizeof(msglifetime);
+  }
 
-  len = strlen(topic) <= TAM_NOME_TOPICO ? strlen(topic) : TAM_NOME_TOPICO;
-  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
-  offset += sizeof(len);
-  memcpy(pack->buf + offset, topic, len);
-  offset += len;
+  strcpy(&pack->buf[offset], username);
+  offset += strlen(username) + 1;
 
-  len = strlen(msg) <= TAM_CORPO_MSG ? strlen(topic) : TAM_CORPO_MSG;
-  memcpy(pack->buf + offset, (char *)&len, sizeof(len));
-  offset += sizeof(len);
-  memcpy(pack->buf + offset, msg, len);
-  offset += len;
+  strcpy(&pack->buf[offset], topic);
+  offset += strlen(topic) + 1;
+
+  strcpy(&pack->buf[offset], msg);
+  offset += strlen(msg) + 1;
 
   pack->head.tam_msg = offset;
 }
@@ -65,4 +60,10 @@ void writeErrorPacket(packet *p, int errCode) {
   p->head.tipo_msg = P_TYPE_MNGR_ERROR;
   p->head.tam_msg = sizeof(int);
   memcpy(p->buf, &errCode, sizeof(int));
+}
+
+void writeSucessPacket(packet *p, int scsCode) {
+  p->head.tipo_msg = P_TYPE_MNGR_SUCCESS;
+  p->head.tam_msg = sizeof(int);
+  memcpy(p->buf, &scsCode, sizeof(int));
 }

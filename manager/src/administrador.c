@@ -1,18 +1,23 @@
 #include "../headers/dadosThreads.h"
 
+void processCmd(packet *p, char *input, char *username);
+
 void *admin_thread(void *args) {
   TDATA *td = (TDATA *)args;
   packet *p = td->p;
+  int *fd = td->fifo_srv;
 
   while (td->cont) {
-    char fifo_cli[30];
-    sprintf(fifo_cli, FIFO_CLI, p->head.pid);
-    int fd_cli = open(fifo_cli, O_WRONLY);
+    printf(">>>");
+    fflush(stdout);
 
-    // prepara pacote a ser enviado
+    char cmdbuf[TAM_CMD_INPUT];
+    fgets(cmdbuf, TAM_CMD_INPUT, stdin);
 
-    int res = write(fd_cli, p, packetSize(*p));
-    close(fd_cli);
+    processCmd(p, cmdbuf, "admin");
+
+    p->head.pid = getpid();
+    int res = write(*fd, p, packetSize(*p));
   }
 
   pthread_exit(NULL);
@@ -22,22 +27,29 @@ void processCmd(packet *p, char *input, char *username) {
   char cmd[12];
   sscanf(input, "%s", cmd);
 
-  char *offset = strchr(input, ' ');
+  char *offset = strchr(input, ' ') + 1;
 
   if (strcmp(cmd, "users")) {
-    // msg type P_TYPE_ADMN_USERS
+    writeEmptyPacket(p, P_TYPE_ADMN_USERS);
+
   } else if (strcmp(cmd, "remove")) {
-    // msg type P_TYPE_ADMN_RMUSR;
+    writeSingleValPacket(p, P_TYPE_ADMN_RMUSR, offset, strlen(offset));
+
   } else if (strcmp(cmd, "topics")) {
-    // msg type P_TYPE_ADMN_TOPIC;
+    writeEmptyPacket(p, P_TYPE_ADMN_TOPIC);
+
   } else if (strcmp(cmd, "show")) {
-    // msg type P_TYPE_ADMN_SHWTOPIC;
+    writeSingleValPacket(p, P_TYPE_ADMN_SHWTOPIC, offset, strlen(offset));
+
   } else if (strcmp(cmd, "lock")) {
-    // msg type P_TYPE_ADMN_LOCK;
+    writeSingleValPacket(p, P_TYPE_ADMN_LOCK, offset, strlen(offset));
+
   } else if (strcmp(cmd, "unlock")) {
-    // msg type P_TYPE_ADMN_UNLOCK;
+    writeSingleValPacket(p, P_TYPE_ADMN_UNLOCK, offset, strlen(offset));
+
   } else if (strcmp(cmd, "close")) {
-    // msg type P_TYPE_ADMN_CLOSE;
+    writeEmptyPacket(p, P_TYPE_ADMN_CLOSE);
+
   } else {
     printf("Comando não reconhecido");
   }

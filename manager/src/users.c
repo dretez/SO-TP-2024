@@ -5,7 +5,7 @@ int addUser(managerData *d, pid_t pid, char *name) {
   for (int i = 0; i < d->nusers; i++)
     if (d->users[i].pid == pid)
       return 0;
-  if (d->nusers < MAX_USERS)
+  if (d->nusers == MAX_USERS)
     return 1;
   char *newname = malloc(sizeof(char) * (strlen(name) + 1));
   if (newname == NULL)
@@ -13,6 +13,7 @@ int addUser(managerData *d, pid_t pid, char *name) {
   strcpy(newname, name);
   d->users[d->nusers].name = newname;
   d->users[d->nusers].pid = pid;
+  d->nusers++;
   return 0;
 }
 
@@ -32,6 +33,13 @@ int findUsr(managerData *d, pid_t pid) {
   for (int i = 0; i < d->nusers; i++)
     if (d->users[i].pid == pid)
       return i;
+  return -1;
+}
+
+pid_t findUsrByName(managerData *d, char *name) {
+  for (int i = 0; i < d->nusers; i++)
+    if (!strcmp(d->users[i].name, name))
+      return d->users[i].pid;
   return -1;
 }
 

@@ -41,6 +41,7 @@ void initManData(managerData *d);
 int addUser(managerData *d, pid_t pid, char *name);
 int rmUser(managerData *d, pid_t pid);
 int findUsr(managerData *d, pid_t pid);
+pid_t findUsrByName(managerData *d, char *name);
 
 topic *getTopic(topic *tlist, unsigned short tcount, char *tname);
 int addTopic(managerData *d, char *tname);

@@ -1,4 +1,6 @@
 #include "../headers/manager.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[]) {
 
@@ -32,23 +34,36 @@ int main(int argc, char *argv[]) {
   }
 
   packet *p_admn = (packet *)malloc(sizeof(packet));
-  if (p_srv == NULL) {
+  if (p_admn == NULL) {
     printf("[ERRO] Falha ao iniciar pacote de dados");
     ext_err = 3;
     goto exit2;
   }
 
+  packet *p_counter = (packet *)malloc(sizeof(packet));
+  if (p_srv == NULL) {
+    printf("[ERRO] Falha ao iniciar pacote de dados");
+    ext_err = 3;
+    goto exit3;
+  }
+
   int cont = 1;
 
-  TDATA t;
-  t.p = p_admn;
-  t.cont = &cont;
+  TDATA t[2];
+  t[0].p = p_admn;
+  t[0].cont = &cont;
+  t[0].fifo_srv = &fd;
+  t[1].p = p_counter;
+  t[1].cont = &cont;
+  t[1].fifo_srv = &fd;
 
   pthread_t th[2];
 
-  pthread_create(&th[0], NULL, admin_thread, (void *)&t);
+  /****************************** INICIA THREADS ******************************/
 
-  pthread_create(&th[1], NULL, counter_thread, (void *)&cont);
+  pthread_create(&th[0], NULL, admin_thread, (void *)&t[0]);
+
+  pthread_create(&th[1], NULL, counter_thread, (void *)&t[1]);
 
   /********************************* SERVIDOR *********************************/
   while (1) {
@@ -57,13 +72,11 @@ int main(int argc, char *argv[]) {
     read(fd, &p_srv->buf, p_srv->head.tam_msg);
 
     /*************************** PROCESSA PACOTE ***************************/
-    if (processPacket(p_srv, &d))
-      // TODO: maybe send a message to all the feeds informing the server's
-      // closing
-      goto exit;
+    processPacket(p_srv, &d);
 
     /************************ ENVIA PACOTE AOS FEEDS ************************/
-    answer(p_srv, &d);
+    if (answer(p_srv, &d))
+      goto exit;
   }
 
 exit:
@@ -72,6 +85,9 @@ exit:
   pthread_join(th[1], NULL);
   // TODO: clean the managerData struct before exiting, as this struct contains
   // allocated memory that needs to be free()'d
+  free(p_counter);
+exit3:
+  free(p_admn);
 exit2:
   free(p_srv);
 exit1:

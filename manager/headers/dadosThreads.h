@@ -9,6 +9,7 @@
 typedef struct {
   packet *p;
   int *cont;
+  int *fifo_srv;
 } TDATA;
 
 // Routinas de threads

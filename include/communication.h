@@ -19,13 +19,21 @@
 #define TAM_BUF maxval(uint16_t)
 
 // Códigos de erro
-// #define P_ERR_ 0
+// #define P_ERR_
 #define P_ERR_GENERIC 0
 #define P_ERR_SRV_FULL 1
 #define P_ERR_TOPIC_LIST_FULL 2
 #define P_ERR_ALREADY_SUBBED 3
 #define P_ERR_INVALID_TOPIC 4
 #define P_ERR_NOT_SUBBED 5
+#define P_ERR_EXIT 6
+
+// Códigos de sucesso
+// #define P_SCS_
+#define P_SCS_GENERIC 0
+#define P_SCS_SUB 1
+#define P_SCS_UNSUB 2
+#define P_SCS_EXIT 3
 
 // Tipos de mensagem
 // mensagens do feed
@@ -34,6 +42,7 @@
 #define P_TYPE_USER_SUB 2
 #define P_TYPE_USER_UNSUB 3
 #define P_TYPE_USER_EXIT 4
+#define P_TYPE_USER_HANDSHK 19 // pacote enviado no login
 // mensagens do manager: comandos do admin
 #define P_TYPE_ADMN_USERS 5
 #define P_TYPE_ADMN_RMUSR 6
@@ -76,6 +85,8 @@ void writeMsgPacket(packet *pack, short msgtype, int msglifetime, char *topic,
                     char *username, char *msg);
 
 void writeErrorPacket(packet *p, int errCode);
+
+void writeSucessPacket(packet *p, int scsCode);
 
 /*
  ************************ TIPOS DE MENSAGENS / COMANDOS ************************

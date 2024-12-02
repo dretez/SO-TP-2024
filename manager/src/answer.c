@@ -20,11 +20,33 @@ int answer(packet *p, managerData *d) {
     for (int i = 0; i < t->nsubs; i++) {
       write2feed(p, t->subs[i]);
     }
+    break;
   }
+
   case P_TYPE_MNGR_RMUSR: {
-    // envia a todos os utilizadores ligados
-    // d.users contém a lista de utilizadores
+    writeSucessPacket(p, P_SCS_EXIT);
+    write2feed(p, p->head.pid);
+    p->head.tipo_msg = P_TYPE_MNGR_RMUSR;
+    p->head.tam_msg = strlen(p->buf) + 1;
+    for (int i = 0; i < d->nusers; i++) {
+      write2feed(p, d->users[i].pid);
+    }
+    break;
   }
+
+  case P_TYPE_USER_SUB: {
+    topic *t = getTopic(d->topics, d->ntopics, p->buf);
+    for (int i = 0; i < t->nPersistMsgs; i++) {
+      persistMsg *pmsg = &t->persistMsgs[i];
+      writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, t->name, pmsg->uname, pmsg->msg);
+      write2feed(p, p->head.pid);
+    }
+    p->head.tipo_msg = P_TYPE_MNGR_SUCCESS;
+    p->head.tam_msg = 0;
+    write2feed(p, p->head.pid);
+    break;
+  }
+
   default: {
     write2feed(p, p->head.pid);
   }
