@@ -33,7 +33,7 @@ FORMATTER = clang-format
 CFLAGS := -Wall -lpthread
 
 
-all: $(BUILD_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
+all: $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
 
 
 $(BIN_DIR)/$(PROG1): $(PROG1_OBJS)
@@ -57,7 +57,7 @@ $(SHARED_OBJ_DIR)/%.o: $(SHARED_SRC_DIR)/%.c
 	@$(CC) -c $< -o $@
 
 
-$(BUILD_DIR): $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR)
+$(BUILD_DIR):
 	@echo "A criar diretório build"
 	@mkdir -p $@
 
