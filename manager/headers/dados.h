@@ -11,7 +11,8 @@
 
 typedef struct {
   int lifetime;
-  char *msg;
+  char *uname;
+  char msg[TAM_CORPO_MSG];
 } persistMsg;
 
 typedef struct {
@@ -38,23 +39,21 @@ typedef struct {
 void initManData(managerData *d);
 
 int addUser(managerData *d, pid_t pid, char *name);
-
-int addTopic(managerData *d, char *tname);
-
 int rmUser(managerData *d, pid_t pid);
-
-void rmTopic(managerData *d, char *tname);
-
-void swapTopic(topic *t1, topic *t2);
+int findUsr(managerData *d, pid_t pid);
 
 topic *getTopic(topic *tlist, unsigned short tcount, char *tname);
-
+int addTopic(managerData *d, char *tname);
+void rmTopic(managerData *d, char *tname);
 pid_t *getSubscribedUser(topic t, char *name);
-
 int subscribeUser(topic *t, pid_t pid);
-
 int unsubscribeUser(topic *t, pid_t pid);
+int findSubbedUsr(pid_t *ul, int uc, pid_t pid);
 
-int findUsr(managerData *d, pid_t pid);
+/* Tenta criar uma nova mensagem persistente */
+int addPersistMsg(managerData *d, char *tname, char *uname, char *msg,
+                  int lifetime);
+/* Remove uma mensagem persistente */
+int rmPersistMsg(topic *t, int idx);
 
 #endif // !MANAGER_DADOS_H
