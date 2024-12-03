@@ -6,5 +6,7 @@
 #include "../../include/communication.h"
 
 int processPacket(packet *p);
+int processSucess(packet *p);
+int processError(packet *p);
 
 #endif // !FEED_RECETOR_H
