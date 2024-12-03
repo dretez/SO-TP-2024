@@ -97,3 +97,27 @@ int processCmd(packet *p, char *input, char *username) {
 
   return 0;
 }
+
+int processSucess(packet *p) {
+  int scsCode;
+  memcpy(&scsCode, p->buf, sizeof(int));
+
+  switch (scsCode) {
+  default: {
+    // TODO: check for invalid sucess code
+  }
+  }
+  return 0;
+}
+
+int processError(packet *p) {
+  int errCode;
+  memcpy(&errCode, p->buf, sizeof(int));
+
+  switch (errCode) {
+  default: {
+    // TODO: check for invalid error code
+  }
+  }
+  return 0;
+}
