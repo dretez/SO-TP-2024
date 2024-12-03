@@ -34,6 +34,7 @@
 #define P_SCS_SUB 1
 #define P_SCS_UNSUB 2
 #define P_SCS_EXIT 3
+#define P_SCS_HANDSHK 4
 
 // Tipos de mensagem
 // mensagens do feed
