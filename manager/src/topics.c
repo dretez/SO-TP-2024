@@ -14,7 +14,6 @@ int addTopic(managerData *d, char *tname) {
   if (d->ntopics >= MAX_TOPICS)
     return 1;
   topic *t = &d->topics[d->ntopics];
-  deleteTopic(t);
   strcpy(t->name, tname);
   d->ntopics++;
   return 0;
@@ -23,6 +22,8 @@ int addTopic(managerData *d, char *tname) {
 void rmTopic(managerData *d, char *tname) {
   topic *t = getTopic(d->topics, d->ntopics, tname);
   swapTopic(t, &d->topics[d->ntopics]);
+  deleteTopic(t);
+  d->ntopics--;
 }
 
 int subscribeUser(topic *t, pid_t pid) {
@@ -82,5 +83,6 @@ void deleteTopic(topic *t) {
   t->nsubs = -1; // nsubs == -1 -> tópico não existe
   for (int i = 0; i < t->nPersistMsgs; i++)
     free(t->persistMsgs[i].uname);
+  t->lock = 0;
   t->nPersistMsgs = 0;
 }

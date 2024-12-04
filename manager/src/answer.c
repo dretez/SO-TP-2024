@@ -5,6 +5,8 @@ void write2feed(packet *p, pid_t pid);
 int answer(packet *p, managerData *d) {
 
   switch (p->head.tipo_msg) {
+  case P_TYPE_MNGR_NOANSW:
+    break;
   case P_TYPE_MNGR_MSG: {
     // encontra o início do nome do tópico no buffer do packet
     int offset = sizeof(int);

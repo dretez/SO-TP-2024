@@ -17,6 +17,7 @@ typedef struct {
 
 typedef struct {
   short nsubs;
+  short lock;
   char name[TAM_NOME_TOPICO];
   pid_t subs[MAX_USERS];
   short nPersistMsgs;

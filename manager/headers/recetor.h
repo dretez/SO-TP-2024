@@ -2,6 +2,7 @@
 #define MANAGER_RECETOR_H
 
 #include "../../include/communication.h"
+#include "../../include/notificacoes.h"
 #include "dados.h"
 
 int processPacket(packet *p, managerData *d);

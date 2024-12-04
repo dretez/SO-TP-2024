@@ -1,5 +1,4 @@
 #include "../headers/feed.h"
-#include <stdio.h>
 
 int main(int argc, char *argv[]) {
 
@@ -37,37 +36,41 @@ int main(int argc, char *argv[]) {
     exit(3);
   }
 
-  writeSingleValPacket(p, P_TYPE_USR_HANDSHK, nome, strlen(nome) + 1);
+  printf("A fazer login...\n");
+  writeSingleValPacket(p, P_TYPE_USER_HANDSHK, nome, strlen(nome) + 1);
+  p->head.pid = getpid();
   write(fd, p, packetSize(*p));
 
   read(fd_cli, &p->head, sizeof(packetHeader));
   read(fd_cli, &p->buf, p->head.tam_msg);
+
   switch (p->head.tipo_msg) {
   case P_TYPE_MNGR_SUCCESS: {
     int scsCode;
     memcpy(&scsCode, p->buf, sizeof(int));
-    if (scsCode != P_SCS_HANDSHK) {
-      printf("Erro ao aceder ao servidor\n");
-      goto exit;
-    }
-    break;
+    if (scsCode == P_SCS_HANDSHK)
+      break;
+    printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
+    goto exit;
   }
   case P_TYPE_MNGR_ERROR: {
     int errCode;
     memcpy(&errCode, p->buf, sizeof(int));
-    if (errCode != P_ERR_SRV_FULL) {
-      printf("Erro ao aceder ao servidor\n");
-      goto exit;
-    }
-    printf("O servidor está cheio\n");
-    goto exit;
-  }
-  default: {
-    printf("Erro ao aceder ao servidor\n");
-    goto exit;
-  }
-  }
 
+    switch (errCode) {
+    case P_ERR_ALREADY_LOGGED:
+      printf(NOTIF_ERR, NOTIF_ALREADY_LOGGED);
+      break;
+    default:
+      printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
+      break;
+    }
+    goto exit;
+  }
+  default:
+    printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
+    goto exit;
+  }
 
   /******************** INDICAR EXISTÊNCIA DO COMANDO HELP ********************/
   // TODO:

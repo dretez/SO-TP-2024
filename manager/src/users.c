@@ -2,14 +2,15 @@
 #include "../headers/dadosAux.h"
 
 int addUser(managerData *d, pid_t pid, char *name) {
-  for (int i = 0; i < d->nusers; i++)
-    if (d->users[i].pid == pid)
-      return 0;
+  for (int i = 0; i < d->nusers; i++) {
+    if (d->users[i].pid == pid || !strcmp(d->users[i].name, name))
+      return 1;
+  }
   if (d->nusers == MAX_USERS)
-    return 1;
+    return 2;
   char *newname = malloc(sizeof(char) * (strlen(name) + 1));
   if (newname == NULL)
-    return 2;
+    return 3;
   strcpy(newname, name);
   d->users[d->nusers].name = newname;
   d->users[d->nusers].pid = pid;

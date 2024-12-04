@@ -3,11 +3,20 @@
 int processPacket(packet *p, managerData *d) {
   switch (p->head.tipo_msg) {
   case P_TYPE_USER_HANDSHK: { // Novo utilizador
-    if (addUser(d, p->head.pid, p->buf)) {
+    switch (addUser(d, p->head.pid, p->buf)) {
+    case 0:
+      writeSucessPacket(p, P_SCS_HANDSHK);
+      break;
+    case 1:
+      writeErrorPacket(p, P_ERR_ALREADY_LOGGED);
+      break;
+    case 2:
+      writeErrorPacket(p, P_ERR_SRV_FULL);
+      break;
+    default:
       writeErrorPacket(p, P_ERR_GENERIC);
       break;
     }
-    writeSucessPacket(p, P_SCS_GENERIC);
     break;
   }
 
@@ -78,7 +87,9 @@ int processPacket(packet *p, managerData *d) {
   }
 
   case P_TYPE_ADMN_USERS: {
-    // print utilizadores
+    for (int i = 0; i < d->nusers; i++)
+      printf("%s\n", d->users[i].name);
+    p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
     break;
   }
 
@@ -88,12 +99,21 @@ int processPacket(packet *p, managerData *d) {
   }
 
   case P_TYPE_ADMN_TOPIC: {
-    // print topics and nPersistMsgs
+    for (int i = 0; i < d->ntopics; i++)
+      printf("%s - %d mensagens persistentes\n", d->topics[i].name,
+             d->topics[i].nPersistMsgs);
+    p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
     break;
   }
 
   case P_TYPE_ADMN_SHWTOPIC: {
+    topic *t = getTopic(d->topics, d->ntopics, p->buf);
+    for (int i = 0; i < t->nPersistMsgs; i++)
+      printf(NOTIF_FEED_MSG, t->name, t->persistMsgs[i].uname,
+             t->persistMsgs[i].msg);
+
     // print persistent msgs from a topic received from the buffer
+    p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
     break;
   }
 
