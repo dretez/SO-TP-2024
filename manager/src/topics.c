@@ -14,7 +14,7 @@ int addTopic(managerData *d, char *tname) {
   if (d->ntopics >= MAX_TOPICS)
     return 1;
   topic *t = &d->topics[d->ntopics];
-  strcpy(t->name, tname);
+  wordncpy(t->name, tname, TAM_NOME_TOPICO);
   d->ntopics++;
   return 0;
 }

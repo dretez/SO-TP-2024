@@ -9,14 +9,12 @@ int answer(packet *p, managerData *d) {
     break;
   case P_TYPE_MNGR_MSG: {
     // encontra o início do nome do tópico no buffer do packet
-    int offset = sizeof(int);
+    uint16_t offset = 0;
     offset += strlen(&p->buf[offset]) + 1;
 
     char topico[TAM_NOME_TOPICO];
-    strcpy(topico, &p->buf[offset]);
+    wordncpy(topico, &p->buf[offset], TAM_NOME_TOPICO);
 
-    if (getTopic(d->topics, d->ntopics, topico) == NULL)
-      addTopic(d, topico);
     topic *t = getTopic(d->topics, d->ntopics, topico);
 
     for (int i = 0; i < t->nsubs; i++) {
@@ -41,10 +39,10 @@ int answer(packet *p, managerData *d) {
     for (int i = 0; i < t->nPersistMsgs; i++) {
       persistMsg *pmsg = &t->persistMsgs[i];
       writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, t->name, pmsg->uname, pmsg->msg);
+      printf(NOTIF_FEED_MSG, t->name, pmsg->uname, pmsg->msg);
       write2feed(p, p->head.pid);
     }
-    p->head.tipo_msg = P_TYPE_MNGR_SUCCESS;
-    p->head.tam_msg = 0;
+    writeSucessPacket(p, P_SCS_SUB);
     write2feed(p, p->head.pid);
     break;
   }

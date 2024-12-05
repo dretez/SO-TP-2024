@@ -13,7 +13,15 @@ int processPacket(packet *p) {
     break;
   }
   case P_TYPE_MNGR_TOPIC: {
-    // print todos os tópicos recebidos
+    uint16_t offset = 0;
+    unsigned short ntopics;
+    memcpy(&ntopics, &p->buf[offset], sizeof(unsigned short));
+    // printf("%x\n", *((unsigned short *)&p->buf[offset]));
+    // printf("%x\n", (unsigned short)ntopics);
+    offset += sizeof(unsigned short);
+    for (unsigned short i = 0; i < ntopics; i++) {
+      printf("%s\n", &p->buf[offset]);
+    }
     break;
   }
   case P_TYPE_MNGR_LOCKD: {

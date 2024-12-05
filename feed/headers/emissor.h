@@ -4,6 +4,7 @@
 #include "../../include/communication.h"
 #include "../../include/globals.h"
 #include "../../include/limites.h"
+#include "../../include/notificacoes.h"
 
 #define FEED_CMD_FMT_EXIT "exit\0"
 #define FEED_CMD_FMT_TOPIC "topics\0"

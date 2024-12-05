@@ -21,11 +21,19 @@ int processPacket(packet *p, managerData *d) {
   }
 
   case P_TYPE_USER_TOPIC: { // Pedido de lista de tópicos
-    p->head.tipo_msg = P_TYPE_MNGR_TOPIC;
-    uint16_t offset;
-    for (int i = 0, offset = 0; i < d->ntopics;
-         offset += strlen(d->topics[i++].name) + 1)
+    uint16_t offset = 0;
+
+    // armazenar o # de topicos facilita a recessão deste packet do lado do feed
+    memcpy(&p->buf[offset], &d->ntopics, sizeof(unsigned short));
+    // printf("%x\n", d->ntopics);
+    // printf("%x\n", *((unsigned short *)&p->buf[offset]));
+    offset += sizeof(unsigned short);
+
+    for (int i = 0; i < d->ntopics; i++) {
       strcpy(&p->buf[offset], d->topics[i].name);
+      offset += strlen(d->topics[i].name) + 1;
+    }
+    p->head.tipo_msg = P_TYPE_MNGR_TOPIC;
     p->head.tam_msg = offset;
     break;
   }
@@ -34,14 +42,28 @@ int processPacket(packet *p, managerData *d) {
     int offset = 0, lifetime;
     memcpy(&lifetime, &p->buf[offset], sizeof(lifetime));
     offset += sizeof(lifetime);
-    char *uname = &p->buf[offset];
+    char *uname = malloc(sizeof(char) * (strlen(&p->buf[offset] + 1)));
+    if (uname == NULL) {
+      writeErrorPacket(p, P_ERR_GENERIC);
+      break;
+    }
+    strcpy(uname, &p->buf[offset]);
     offset += strlen(uname) + 1;
-    char *topic = &p->buf[offset];
-    offset += strlen(topic) + 1;
-    char *msg = &p->buf[offset];
-    if (lifetime > 0)
-      addPersistMsg(d, topic, uname, msg, lifetime);
-    writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, topic, uname, msg);
+    char topico[TAM_NOME_TOPICO];
+    strcpy(topico, &p->buf[offset]);
+    offset += strlen(topico) + 1;
+    char msg[TAM_CORPO_MSG];
+    strcpy(msg, &p->buf[offset]);
+    if (getTopic(d->topics, d->ntopics, topico) == NULL &&
+        addTopic(d, topico) == 1) {
+      writeErrorPacket(p, P_ERR_TOPIC_LIST_FULL);
+      break;
+    }
+    subscribeUser(getTopic(d->topics, d->ntopics, topico), p->head.pid);
+    if (lifetime > 0 && addPersistMsg(d, topico, uname, msg, lifetime) != 0) {
+      // falha ao criar uma mensagem persistente
+    }
+    writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, topico, uname, msg);
     break;
   }
 
@@ -51,13 +73,11 @@ int processPacket(packet *p, managerData *d) {
       writeErrorPacket(p, P_ERR_TOPIC_LIST_FULL);
       break;
     }
+    topico = getTopic(d->topics, d->ntopics, p->buf);
     if (subscribeUser(topico, p->head.pid)) {
       writeErrorPacket(p, P_ERR_ALREADY_SUBBED);
       break;
     }
-    // TODO: enviar de volta todas as mensagens persistentes
-    p->head.tipo_msg = P_TYPE_MNGR_SUCCESS;
-    p->head.tam_msg = 0;
     break;
   }
 

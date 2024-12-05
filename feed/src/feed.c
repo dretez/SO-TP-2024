@@ -77,10 +77,9 @@ int main(int argc, char *argv[]) {
 
   /****************** REALIZA O ENVIO E RECEÇÃO DE MENSAGEMS ******************/
 
+  printf(">>>");
+  fflush(stdout);
   while (1) {
-    printf(">>>");
-    fflush(stdout);
-
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(0, &fds);
@@ -102,11 +101,14 @@ int main(int argc, char *argv[]) {
     if (FD_ISSET(0, &fds)) {
       char cmdbuf[TAM_CMD_INPUT];
       fgets(cmdbuf, TAM_CMD_INPUT, stdin);
+      cmdbuf[strlen(cmdbuf) - 1] = '\0';
 
       if (!processCmd(p, cmdbuf, nome)) {
         p->head.pid = getpid();
         int res = write(fd, p, packetSize(*p));
       }
+      printf(">>>");
+      fflush(stdout);
     }
   }
 

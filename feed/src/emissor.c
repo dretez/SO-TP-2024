@@ -76,7 +76,7 @@ int processCmd(packet *p, char *input, char *username) {
       return -1;
     }
     char msg[TAM_CORPO_MSG];
-    sscanf(&input[offset], "%s", msg);
+    strcpy(msg, &input[offset]);
 
     writeMsgPacket(p, P_TYPE_USER_MSG, duracao, topic, username, msg);
 

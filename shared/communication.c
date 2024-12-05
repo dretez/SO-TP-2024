@@ -1,5 +1,4 @@
 #include "../include/communication.h"
-#include <string.h>
 
 size_t packetSize(packet p) { return sizeof(packetHeader) + p.head.tam_msg; }
 
