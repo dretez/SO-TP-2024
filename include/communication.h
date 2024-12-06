@@ -28,6 +28,7 @@
 #define P_ERR_NOT_SUBBED 5
 #define P_ERR_EXIT 6
 #define P_ERR_ALREADY_LOGGED 7
+#define P_ERR_IS_LOCKED 8
 
 // Códigos de sucesso
 // #define P_SCS_
@@ -57,11 +58,11 @@
 #define P_TYPE_MNGR_MSG 12
 #define P_TYPE_MNGR_RMUSR 13
 #define P_TYPE_MNGR_TOPIC 14
-#define P_TYPE_MNGR_LOCKD 15
 #define P_TYPE_MNGR_USERS 16
 #define P_TYPE_MNGR_ERROR 17
 #define P_TYPE_MNGR_SUCCESS 18
 #define P_TYPE_MNGR_NOANSW 20
+#define P_TYPE_MNGR_DECREMENT 21
 
 typedef struct {
   pid_t pid;
