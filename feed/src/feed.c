@@ -77,9 +77,10 @@ int main(int argc, char *argv[]) {
 
   /****************** REALIZA O ENVIO E RECEÇÃO DE MENSAGEMS ******************/
 
-  printf(">>>");
-  fflush(stdout);
   while (1) {
+    printf(">>>");
+    fflush(stdout);
+
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(0, &fds);
@@ -107,8 +108,6 @@ int main(int argc, char *argv[]) {
         p->head.pid = getpid();
         int res = write(fd, p, packetSize(*p));
       }
-      printf(">>>");
-      fflush(stdout);
     }
   }
 

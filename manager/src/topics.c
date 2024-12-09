@@ -15,6 +15,7 @@ int addTopic(managerData *d, char *tname) {
     return 1;
   topic *t = &d->topics[d->ntopics];
   wordncpy(t->name, tname, TAM_NOME_TOPICO);
+  t->nsubs = 0;
   d->ntopics++;
   return 0;
 }

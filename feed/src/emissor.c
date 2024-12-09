@@ -29,7 +29,7 @@ int processCmd(packet *p, char *input, char *username) {
     }
     char topic[TAM_NOME_TOPICO];
     wordncpy(topic, &input[offset], TAM_NOME_TOPICO);
-    writeSingleValPacket(p, P_TYPE_USER_SUB, topic, strlen(topic));
+    writeSingleValPacket(p, P_TYPE_USER_SUB, topic, strlen(topic) + 1);
 
   } else if (!strcmp(cmd, "unsubscribe")) {
     offset = nextword(input, offset, TAM_CMD_INPUT);
@@ -43,7 +43,7 @@ int processCmd(packet *p, char *input, char *username) {
     }
     char topic[TAM_NOME_TOPICO];
     wordncpy(topic, &input[offset], TAM_NOME_TOPICO);
-    writeSingleValPacket(p, P_TYPE_USER_UNSUB, topic, strlen(topic));
+    writeSingleValPacket(p, P_TYPE_USER_UNSUB, topic, strlen(topic) + 1);
 
   } else if (!strcmp(cmd, "msg")) {
     offset = nextword(input, offset, TAM_CMD_INPUT);
@@ -76,7 +76,7 @@ int processCmd(packet *p, char *input, char *username) {
       return -1;
     }
     char msg[TAM_CORPO_MSG];
-    strcpy(msg, &input[offset]);
+    strncpy(msg, &input[offset], TAM_CORPO_MSG);
 
     writeMsgPacket(p, P_TYPE_USER_MSG, duracao, topic, username, msg);
 
@@ -95,29 +95,5 @@ int processCmd(packet *p, char *input, char *username) {
     return -1;
   }
 
-  return 0;
-}
-
-int processSucess(packet *p) {
-  int scsCode;
-  memcpy(&scsCode, p->buf, sizeof(int));
-
-  switch (scsCode) {
-  default: {
-    // TODO: check for invalid sucess code
-  }
-  }
-  return 0;
-}
-
-int processError(packet *p) {
-  int errCode;
-  memcpy(&errCode, p->buf, sizeof(int));
-
-  switch (errCode) {
-  default: {
-    // TODO: check for invalid error code
-  }
-  }
   return 0;
 }

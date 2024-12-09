@@ -14,6 +14,8 @@
 #define NOTIF_ALREADY_LOGGED "Este utilizador já está ligado."
 #define NOTIF_ERR_LOGIN "Imposibilidade de aceder ao servidor."
 
+#define NOTIF_LOCKED "Tópico \"%s\" não está a receber mensagens."
+
 // feed message format
 // {topic}> {username}: {message}
 #define NOTIF_FEED_MSG "%s> %s: %s\n"

@@ -1,13 +1,13 @@
 #include "../headers/dadosThreads.h"
 
-void processCmd(packet *p, char *input);
+int processCmd(packet *p, char *input);
 
 void *admin_thread(void *args) {
   TDATA *td = (TDATA *)args;
   packet *p = td->p;
   int *fd = td->fifo_srv;
 
-  while (td->cont) {
+  while (*td->cont) {
     printf(">>>");
     fflush(stdout);
 
@@ -15,16 +15,26 @@ void *admin_thread(void *args) {
     fgets(cmdbuf, TAM_CMD_INPUT, stdin);
     cmdbuf[strlen(cmdbuf) - 1] = '\0';
 
-    processCmd(p, cmdbuf);
-
-    p->head.pid = getpid();
-    int res = write(*fd, p, packetSize(*p));
+    switch (processCmd(p, cmdbuf)) {
+    case 0: {
+      p->head.pid = getpid();
+      int res = write(*fd, p, packetSize(*p));
+      break;
+    }
+    case 2: {
+      p->head.pid = getpid();
+      int res = write(*fd, p, packetSize(*p));
+      pthread_exit(NULL);
+    }
+    default:
+      break;
+    }
   }
 
   pthread_exit(NULL);
 }
 
-void processCmd(packet *p, char *input) {
+int processCmd(packet *p, char *input) {
   char cmd[12];
   int offset = 0;
   if (input[0] == ' ') {
@@ -63,8 +73,11 @@ void processCmd(packet *p, char *input) {
 
   } else if (!strcmp(cmd, "close")) {
     writeEmptyPacket(p, P_TYPE_ADMN_CLOSE);
+    return 2;
 
   } else {
     printf("Comando não reconhecido");
+    return 1;
   }
+  return 0;
 }

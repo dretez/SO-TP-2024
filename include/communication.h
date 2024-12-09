@@ -7,17 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// Macros
-#define maxval(type)                                                           \
-  (1 << sizeof(type) * CHAR_BIT) - 1 // obtém o valor maximo permitido por type
-                                     // ou o equivalente a colocar todos os
-                                     // bits de type a 1
-
-// #include "globals.h"
-
-// Dados mensagens
-#define TAM_BUF maxval(uint16_t)
-
 // Códigos de erro
 // #define P_ERR_
 #define P_ERR_GENERIC 0
@@ -63,6 +52,16 @@
 #define P_TYPE_MNGR_SUCCESS 18
 #define P_TYPE_MNGR_NOANSW 20
 #define P_TYPE_MNGR_DECREMENT 21
+#define P_TYPE_MNGR_CLOSE 22
+
+// Macros
+#define maxval(type)                                                           \
+  (1 << sizeof(type) * CHAR_BIT) - 1 // obtém o valor maximo permitido por type
+                                     // ou o equivalente a colocar todos os
+                                     // bits de type a 1
+
+// Dados mensagens
+#define TAM_BUF maxval(uint16_t)
 
 typedef struct {
   pid_t pid;
