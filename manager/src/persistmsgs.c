@@ -4,9 +4,12 @@
 void savePMsgs(managerData d, FILE *f) {
   for (int i = 0; i < d.ntopics; i++) {
     topic t = d.topics[i];
-    for (int j; j < t.nPersistMsgs; j++) {
+    for (int j = 0; j < t.nPersistMsgs; j++) {
       persistMsg pmsg = t.persistMsgs[j];
-      fprintf(f, "%s %s %d %s\n", t.name, pmsg.uname, pmsg.lifetime, pmsg.msg);
+      char aux[TAM_BUF];
+      sprintf(aux, "%s %s %d %s\n", t.name, pmsg.uname, pmsg.lifetime,
+              pmsg.msg);
+      fputs(aux, f);
     }
   }
 }
@@ -19,14 +22,14 @@ int addPersistMsg(managerData *d, char *tname, char *uname, char *msg,
   topic *t = getTopic(d->topics, d->ntopics, tname);
   if (t->nPersistMsgs == MAX_PERSISTENT_MSGS)
     return -1;
-  t->persistMsgs[t->nPersistMsgs].uname =
-      malloc(sizeof(char) * strlen(uname) + 1);
-  if (t->persistMsgs[t->nPersistMsgs].uname == NULL) {
+  persistMsg *pmsg = &t->persistMsgs[t->nPersistMsgs];
+  pmsg->uname = malloc(sizeof(char) * strlen(uname) + 1);
+  if (pmsg->uname == NULL) {
     return -2;
   }
-  strcpy(t->persistMsgs[t->nPersistMsgs].uname, uname);
-  strcpy(t->persistMsgs[t->nPersistMsgs].msg, msg);
-  t->persistMsgs[t->nPersistMsgs].lifetime = lifetime;
+  strcpy(pmsg->uname, uname);
+  strcpy(pmsg->msg, msg);
+  pmsg->lifetime = lifetime;
   t->nPersistMsgs++;
   return 0;
 }
@@ -51,18 +54,21 @@ void loadPMsgs(managerData *d, FILE *f) {
     int offset = 0;
     char tname[TAM_NOME_TOPICO];
     wordncpy(tname, &line[offset], TAM_NOME_TOPICO);
-    offset += nextword(line, offset, TAM_BUF);
+    offset = nextword(line, offset, TAM_BUF);
     char *uname = malloc(sizeof(char) * wordlen(&line[offset]));
     if (uname == NULL) {
       printf("[ERRO] Falha ao iniciar mensagens armazenadas.");
       return;
     }
     wordncpy(uname, &line[offset], wordlen(&line[offset]) + 1);
-    offset += nextword(line, offset, TAM_BUF);
+    offset = nextword(line, offset, TAM_BUF);
     int lt = atoi(&line[offset]);
-    offset += nextword(line, offset, TAM_BUF);
+    offset = nextword(line, offset, TAM_BUF);
     char msg[TAM_CORPO_MSG];
     strncpy(msg, &line[offset], TAM_CORPO_MSG);
+    char *aux = &msg[strlen(msg) - 1];
+    if (*aux == '\n')
+      *aux = '\0';
 
     addPersistMsg(d, tname, uname, msg, lt);
     free(uname);

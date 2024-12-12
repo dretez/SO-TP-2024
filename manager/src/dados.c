@@ -9,7 +9,12 @@ void initManData(managerData *d) {
   if (savedata == NULL) {
     return;
   }
-  FILE *f = fopen(savedata, "rt");
+  FILE *f = fopen(savedata, "r");
+  if (f == NULL) {
+    printf("%s: ficheiro não encontrado, não foram recuperadas mensagens\n",
+           savedata);
+    return;
+  }
   loadPMsgs(d, f);
   fclose(f);
 }

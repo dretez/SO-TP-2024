@@ -32,10 +32,10 @@ FORMATTER = clang-format
 
 CFLAGS := -Wall -Wextra -lpthread
 # Uncomment bellow to enable debugging info 
-# CFLAGS += -g
+CFLAGS += -g
 
 
-all: $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
+all: clean_pipes $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
 
 broker: $(BUILD_DIR) $(SHARED_OBJ_DIR) $(PROG1_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1)
 
