@@ -31,6 +31,11 @@ int answer(packet *p, managerData *d) {
       break;
     }
     topic *t = getTopic(d->topics, d->ntopics, topico);
+    if (t->lock) {
+      free(uname);
+      writeErrorPacket(p, P_ERR_IS_LOCKED);
+      break;
+    }
     offset += strlen(topico) + 1;
 
     char msg[TAM_CORPO_MSG];
@@ -43,7 +48,6 @@ int answer(packet *p, managerData *d) {
     if (!subscribeUser(getTopic(d->topics, d->ntopics, topico), p->head.pid)) {
       writeSucessPacket(p, P_SCS_SUB);
       write2feed(p, p->head.pid);
-      sendPersistMsgs(p, d, topico);
     }
 
     writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, topico, uname, msg);
@@ -53,6 +57,15 @@ int answer(packet *p, managerData *d) {
     }
 
     free(uname);
+    break;
+  }
+
+  case P_TYPE_MNGR_FORCE_RMUSR: {
+    for (int i = 0; i < d->nusers; i++) {
+      write2feed(p, d->users[i].pid);
+    }
+    writeSucessPacket(p, P_SCS_FORCE_EXIT);
+    write2feed(p, p->head.pid);
     break;
   }
 
@@ -75,9 +88,7 @@ int answer(packet *p, managerData *d) {
   case P_TYPE_MNGR_CLOSE: {
     for (int i = 0; i < d->nusers; i++)
       write2feed(p, d->users[i].pid);
-    // TODO: save data
     return 1;
-    break;
   }
 
   default: {
@@ -93,7 +104,7 @@ void write2feed(packet *p, pid_t pid) {
   sprintf(fifo_cli, FIFO_CLI, pid);
   int fd_cli = open(fifo_cli, O_WRONLY);
 
-  int res = write(fd_cli, p, packetSize(*p));
+  write(fd_cli, p, packetSize(*p));
 
   close(fd_cli);
 }
@@ -103,7 +114,6 @@ void sendPersistMsgs(packet *p, managerData *d, char *tname) {
   for (int i = 0; i < t->nPersistMsgs; i++) {
     persistMsg *pmsg = &t->persistMsgs[i];
     writeMsgPacket(p, P_TYPE_MNGR_MSG, -1, t->name, pmsg->uname, pmsg->msg);
-    printf(NOTIF_FEED_MSG, t->name, pmsg->uname, pmsg->msg);
     write2feed(p, p->head.pid);
   }
 }

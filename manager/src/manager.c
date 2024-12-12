@@ -1,6 +1,6 @@
 #include "../headers/manager.h"
 
-int main(int argc, char *argv[]) {
+int main() {
 
   if (access(FIFO_SRV, F_OK) == 0) {
     printf("[ERRO] Ja existe um servidor!\n");
@@ -45,6 +45,15 @@ int main(int argc, char *argv[]) {
     goto exit3;
   }
 
+  /***************************** DESATIVA SINAIS *****************************/
+
+  sigset_t sigs;
+  sigemptyset(&sigs);
+  sigaddset(&sigs, SIGINT);
+  sigprocmask(SIG_BLOCK, &sigs, NULL);
+
+  /****************************** INICIA THREADS ******************************/
+
   int cont = 1;
 
   TDATA t[2];
@@ -57,15 +66,12 @@ int main(int argc, char *argv[]) {
 
   pthread_t th[2];
 
-  /****************************** INICIA THREADS ******************************/
-
   pthread_create(&th[0], NULL, admin_thread, (void *)&t[0]);
 
   pthread_create(&th[1], NULL, counter_thread, (void *)&t[1]);
 
   /********************************* SERVIDOR *********************************/
   while (1) {
-    /**************************** AGUARDA PACOTE ****************************/
     read(fd, &p_srv->head, sizeof(packetHeader));
     read(fd, &p_srv->buf, p_srv->head.tam_msg);
 
@@ -81,6 +87,15 @@ exit:
   cont = 0;
   pthread_join(th[0], NULL);
   pthread_join(th[1], NULL);
+  char *savedata = getenv(SAVEFILE);
+  if (savedata == NULL) {
+    printf("\"%s\" não está definido, as mensagens não serão armazenadas.\n",
+           SAVEFILE);
+  } else {
+    FILE *f = fopen(savedata, "wt");
+    savePMsgs(d, f);
+    fclose(f);
+  }
   // TODO: clean the managerData struct before exiting, as this struct contains
   // allocated memory that needs to be free()'d
   free(p_counter);

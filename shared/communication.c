@@ -18,10 +18,9 @@ void writeStringListPacket(packet *pack, short msgtype, char **strs,
                            int strsSize) {
   pack->head.tipo_msg = msgtype;
 
-  unsigned short offset;
+  unsigned short offset = 0;
 
-  for (int i = 0, offset = 0;
-       i < strsSize && offset + strlen(strs[i]) < TAM_BUF;
+  for (int i = 0; i < strsSize && offset + strlen(strs[i]) < TAM_BUF;
        offset += strlen(strs[i++]))
     strcpy(&pack->buf[offset], strs[i]);
 

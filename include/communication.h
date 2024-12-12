@@ -26,30 +26,32 @@
 #define P_SCS_UNSUB 2
 #define P_SCS_EXIT 3
 #define P_SCS_HANDSHK 4
+#define P_SCS_FORCE_EXIT 5
 
 // Tipos de mensagem
 // mensagens do feed
-#define P_TYPE_USER_TOPIC 0
-#define P_TYPE_USER_MSG 1
-#define P_TYPE_USER_SUB 2
-#define P_TYPE_USER_UNSUB 3
-#define P_TYPE_USER_EXIT 4
-#define P_TYPE_USER_HANDSHK 19 // pacote enviado no login
+#define P_TYPE_USER_HANDSHK 0 // pacote enviado no login
+#define P_TYPE_USER_TOPIC 1
+#define P_TYPE_USER_MSG 2
+#define P_TYPE_USER_SUB 3
+#define P_TYPE_USER_UNSUB 4
+#define P_TYPE_USER_EXIT 5
 // mensagens do manager: comandos do admin
-#define P_TYPE_ADMN_USERS 5
-#define P_TYPE_ADMN_RMUSR 6
-#define P_TYPE_ADMN_TOPIC 7
-#define P_TYPE_ADMN_SHWTOPIC 8
-#define P_TYPE_ADMN_LOCK 9
-#define P_TYPE_ADMN_UNLOCK 10
-#define P_TYPE_ADMN_CLOSE 11
+#define P_TYPE_ADMN_USERS 6
+#define P_TYPE_ADMN_RMUSR 7
+#define P_TYPE_ADMN_TOPIC 8
+#define P_TYPE_ADMN_SHWTOPIC 9
+#define P_TYPE_ADMN_LOCK 10
+#define P_TYPE_ADMN_UNLOCK 11
+#define P_TYPE_ADMN_CLOSE 12
 // mensagens do manager: respostas
-#define P_TYPE_MNGR_MSG 12
-#define P_TYPE_MNGR_RMUSR 13
-#define P_TYPE_MNGR_TOPIC 14
-#define P_TYPE_MNGR_USERS 16
-#define P_TYPE_MNGR_ERROR 17
-#define P_TYPE_MNGR_SUCCESS 18
+#define P_TYPE_MNGR_MSG 13
+#define P_TYPE_MNGR_RMUSR 14
+#define P_TYPE_MNGR_FORCE_RMUSR 15
+#define P_TYPE_MNGR_TOPIC 16
+#define P_TYPE_MNGR_USERS 17
+#define P_TYPE_MNGR_ERROR 18
+#define P_TYPE_MNGR_SUCCESS 19
 #define P_TYPE_MNGR_NOANSW 20
 #define P_TYPE_MNGR_DECREMENT 21
 #define P_TYPE_MNGR_CLOSE 22

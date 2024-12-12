@@ -52,7 +52,6 @@ int processPacket(packet *p, managerData *d) {
       writeErrorPacket(p, P_ERR_ALREADY_SUBBED);
       break;
     }
-    writeSucessPacket(p, P_SCS_SUB);
     break;
   }
 
@@ -93,16 +92,26 @@ int processPacket(packet *p, managerData *d) {
   }
 
   case P_TYPE_ADMN_RMUSR: {
-    // force remove a user
+    int upid = findUsrByName(d, p->buf);
+    if (upid == -1) {
+      printf(NOTIF_ERR, "Utilizador não encontrado");
+      p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
+      break;
+    }
+    if (rmUser(d, upid)) {
+      printf(NOTIF_ERR, "Falha ao remover utilizador");
+      p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
+      break;
+    }
+    p->head.pid = upid;
+    p->head.tipo_msg = P_TYPE_MNGR_FORCE_RMUSR;
     break;
   }
 
   case P_TYPE_ADMN_TOPIC: {
     for (int i = 0; i < d->ntopics; i++) {
-      printf("%s - %d mensagens persistentes\n%d users:\n", d->topics[i].name,
-             d->topics[i].nPersistMsgs, d->topics[i].nsubs);
-      for (int j = 0; j < d->topics[i].nsubs; j++)
-        printf("\t%d", d->topics[i].subs[j]);
+      printf("%s - %d mensagens persistentes\n", d->topics[i].name,
+             d->topics[i].nPersistMsgs);
     }
     p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
     break;
@@ -110,6 +119,11 @@ int processPacket(packet *p, managerData *d) {
 
   case P_TYPE_ADMN_SHWTOPIC: {
     topic *t = getTopic(d->topics, d->ntopics, p->buf);
+    if (t == NULL) {
+      printf(NOTIF_ERR, "Tópico desconhecido");
+      p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
+      break;
+    }
     for (int i = 0; i < t->nPersistMsgs; i++)
       printf(NOTIF_FEED_MSG, t->name, t->persistMsgs[i].uname,
              t->persistMsgs[i].msg);
@@ -131,8 +145,19 @@ int processPacket(packet *p, managerData *d) {
   }
 
   case P_TYPE_ADMN_CLOSE: {
-    // inform all users of the manager's closure, save data and close
     writeEmptyPacket(p, P_TYPE_MNGR_CLOSE);
+    break;
+  }
+
+  case P_TYPE_MNGR_DECREMENT: {
+    for (int i = 0; i < d->ntopics; i++) {
+      topic *t = &d->topics[i];
+      for (int j = 0; j < t->nPersistMsgs; j++) {
+        t->persistMsgs[j].lifetime--;
+        if (t->persistMsgs[j].lifetime <= 0)
+          rmPersistMsg(t, j);
+      }
+    }
     break;
   }
 

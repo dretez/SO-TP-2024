@@ -52,6 +52,8 @@ int subscribeUser(topic *t, pid_t pid);
 int unsubscribeUser(topic *t, pid_t pid);
 int findSubbedUsr(pid_t *ul, int uc, pid_t pid);
 
+/* Armazena mensagens persistentes */
+void savePMsgs(managerData d, FILE *f);
 /* Tenta criar uma nova mensagem persistente */
 int addPersistMsg(managerData *d, char *tname, char *uname, char *msg,
                   int lifetime);

@@ -1,5 +1,4 @@
 #include "../headers/recetor.h"
-#include <stdio.h>
 
 int processPacket(packet *p) {
   switch (p->head.tipo_msg) {
@@ -28,7 +27,6 @@ int processPacket(packet *p) {
 
   case P_TYPE_MNGR_MSG: {
     int offset = 0;
-    printf("A receber mensagem\n");
 
     char *uname = malloc(sizeof(char) * (strlen(&p->buf[offset] + 1)));
     if (uname == NULL) {
@@ -84,6 +82,10 @@ int processSucess(packet *p) {
   case P_SCS_EXIT: {
     return 1;
   }
+  case P_SCS_FORCE_EXIT: {
+    printf("Foi removido pelo administrador.\n");
+    return 1;
+  }
   default: {
     // TODO: check for invalid sucess code
   }
@@ -113,6 +115,10 @@ int processError(packet *p) {
   }
   case P_ERR_NOT_SUBBED: {
     printf("Ainda não está subscrito\n");
+    break;
+  }
+  case P_ERR_IS_LOCKED: {
+    printf("O tópico não está a aceitar mensagens neste momento.");
     break;
   }
   case P_ERR_EXIT: {

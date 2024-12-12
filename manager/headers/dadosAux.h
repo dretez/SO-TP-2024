@@ -1,7 +1,11 @@
 #ifndef INCLUDE_HEADERS_DADOSAUX_H_
 #define INCLUDE_HEADERS_DADOSAUX_H_
 
+#include "../../include/communication.h"
 #include "dados.h"
+
+/* Recupera mensagens persistentes armazenadas por uma sessão anterior */
+void loadPMsgs(managerData *d, FILE *f);
 
 /* Esvazia a lista de utilizadores */
 void initUsrs(user *u);

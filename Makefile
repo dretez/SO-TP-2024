@@ -30,31 +30,37 @@ PROG2_OBJS := $(SHARED_OBJS) $(PROG2_SRCS:$(PROG2_SRC_DIR)/%.c=$(PROG2_OBJ_DIR)/
 CC := gcc
 FORMATTER = clang-format
 
-CFLAGS := -Wall -lpthread
+CFLAGS := -Wall -Wextra -lpthread
+# Uncomment bellow to enable debugging info 
+# CFLAGS += -g
 
 
 all: $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
 
+broker: $(BUILD_DIR) $(SHARED_OBJ_DIR) $(PROG1_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1)
+
+feed: $(BUILD_DIR) $(SHARED_OBJ_DIR) $(PROG2_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG2)
+
 
 $(BIN_DIR)/$(PROG1): $(PROG1_OBJS)
 	@echo A linkar $(PROG1)
-	@$(CC) $(CFLAGS) $(PROG1_OBJS) -o $@
+	@$(CC) $(PROG1_OBJS) -o $@
 
 $(BIN_DIR)/$(PROG2): $(PROG2_OBJS)
 	@echo A linkar $(PROG2)
-	@$(CC) $(CFLAGS) $(PROG2_OBJS) -o $@
+	@$(CC) $(PROG2_OBJS) -o $@
 
 $(PROG1_OBJ_DIR)/%.o: $(PROG1_SRC_DIR)/%.c
 	@echo A compilar $@
-	@$(CC) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(PROG2_OBJ_DIR)/%.o: $(PROG2_SRC_DIR)/%.c
 	@echo A compilar $@
-	@$(CC) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(SHARED_OBJ_DIR)/%.o: $(SHARED_SRC_DIR)/%.c
 	@echo A compilar $@
-	@$(CC) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 
 $(BUILD_DIR):

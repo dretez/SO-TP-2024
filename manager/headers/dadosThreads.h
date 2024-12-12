@@ -12,6 +12,8 @@ typedef struct {
   int *fifo_srv;
 } TDATA;
 
+void stopManager();
+
 // Routinas de threads
 void *admin_thread(void *args);
 void *counter_thread(void *args);

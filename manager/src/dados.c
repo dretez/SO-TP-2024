@@ -5,4 +5,11 @@ void initManData(managerData *d) {
   d->ntopics = d->nusers = 0;
   initUsrs(d->users);
   initTopics(d->topics);
+  char *savedata = getenv("MSG_FICH");
+  if (savedata == NULL) {
+    return;
+  }
+  FILE *f = fopen(savedata, "rt");
+  loadPMsgs(d, f);
+  fclose(f);
 }

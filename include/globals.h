@@ -4,6 +4,7 @@
 // Includes
 #include <fcntl.h>
 #include <limits.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,8 @@
 // pipes
 #define FIFO_SRV "srv_pipe"
 #define FIFO_CLI "cli_%d"
+
+#define SAVEFILE "MSG_FICH"
 
 /* Devolve o tamanho de uma palavra, ou seja, o # de carateres até um espaço em
  * branco */

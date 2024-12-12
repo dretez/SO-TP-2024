@@ -72,6 +72,20 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+  /***************************** DESATIVA SINAIS *****************************/
+
+  struct sigaction sa;
+
+  sa.sa_flags = 0;
+  sa.sa_handler = SIG_IGN;
+  sigaction(SIGINT, &sa, NULL);
+
+  /***************************** MODIFICA SINAIS *****************************/
+
+  sa.sa_flags = SA_SIGINFO;
+  sa.sa_sigaction = stopFeed;
+  sigaction(SIGINT, &sa, NULL);
+
   /******************** INDICAR EXISTÊNCIA DO COMANDO HELP ********************/
   // TODO:
 
@@ -106,17 +120,30 @@ int main(int argc, char *argv[]) {
 
       if (!processCmd(p, cmdbuf, nome)) {
         p->head.pid = getpid();
-        int res = write(fd, p, packetSize(*p));
+        write(fd, p, packetSize(*p));
       }
     }
   }
 
   /***************************** TERMINA PROGRAMA *****************************/
 exit:
-  printf("FIM! \n");
   free(p);
   close(fd);
   close(fd_cli);
   unlink(fifo_cli);
   exit(0);
+}
+
+void stopFeed() {
+  int fd = open(FIFO_SRV, O_WRONLY);
+
+  packet *p = (packet *)malloc(sizeof(packet));
+  if (p == NULL) {
+    printf("[ERRO] Não foi possível terminar o programa\n");
+    return;
+  }
+
+  processCmd(p, "exit\0", "\0");
+  p->head.pid = getpid();
+  write(fd, p, packetSize(*p));
 }
