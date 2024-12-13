@@ -68,9 +68,6 @@ int processSucess(packet *p) {
   memcpy(&scsCode, p->buf, sizeof(int));
 
   switch (scsCode) {
-  case P_SCS_GENERIC: {
-    break;
-  }
   case P_SCS_SUB: {
     printf(NOTIF_SCS_SUB);
     break;
@@ -86,8 +83,9 @@ int processSucess(packet *p) {
     printf("Foi removido pelo administrador.\n");
     return 1;
   }
-  default: {
-    // TODO: check for invalid sucess code
+  default:
+  case P_SCS_GENERIC: {
+    break;
   }
   }
   return 0;
@@ -98,9 +96,6 @@ int processError(packet *p) {
   memcpy(&errCode, p->buf, sizeof(int));
 
   switch (errCode) {
-  case P_ERR_GENERIC: {
-    break;
-  }
   case P_ERR_TOPIC_LIST_FULL: {
     printf(NOTIF_ERR_TOPIC_LIST_FULL);
     break;
@@ -118,14 +113,15 @@ int processError(packet *p) {
     break;
   }
   case P_ERR_IS_LOCKED: {
-    printf("O tópico não está a aceitar mensagens neste momento.");
+    printf("O tópico não está a aceitar mensagens neste momento.\n");
     break;
   }
   case P_ERR_EXIT: {
     printf("Ocorreu um erro ao tentar sair.\n");
   }
-  default: {
-    // TODO: check for invalid error code
+  default:
+  case P_ERR_GENERIC: {
+    break;
   }
   }
   return 0;

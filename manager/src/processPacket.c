@@ -124,11 +124,12 @@ int processPacket(packet *p, managerData *d) {
       p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
       break;
     }
-    for (int i = 0; i < t->nPersistMsgs; i++)
-      printf(NOTIF_FEED_MSG, t->name, t->persistMsgs[i].uname,
-             t->persistMsgs[i].msg);
+    for (int i = 0; i < t->nPersistMsgs; i++) {
+      persistMsg *pmsg = &t->persistMsgs[i];
+      printf("(%d) " NOTIF_FEED_MSG, pmsg->lifetime, t->name, pmsg->uname,
+             pmsg->msg);
+    }
 
-    // print persistent msgs from a topic received from the buffer
     p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
     break;
   }

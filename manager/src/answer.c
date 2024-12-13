@@ -16,6 +16,7 @@ int answer(packet *p, managerData *d) {
     char *uname = malloc(sizeof(char) * (strlen(&p->buf[offset] + 1)));
     if (uname == NULL) {
       writeErrorPacket(p, P_ERR_GENERIC);
+      write2feed(p, p->head.pid);
       break;
     }
     strcpy(uname, &p->buf[offset]);
@@ -26,6 +27,7 @@ int answer(packet *p, managerData *d) {
     if (getTopic(d->topics, d->ntopics, topico) == NULL &&
         addTopic(d, topico) == 1) {
       writeErrorPacket(p, P_ERR_TOPIC_LIST_FULL);
+      write2feed(p, p->head.pid);
       free(uname);
       break;
     }
@@ -33,6 +35,7 @@ int answer(packet *p, managerData *d) {
     if (t->lock) {
       free(uname);
       writeErrorPacket(p, P_ERR_IS_LOCKED);
+      write2feed(p, p->head.pid);
       break;
     }
     offset += strlen(topico) + 1;
