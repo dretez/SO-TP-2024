@@ -20,22 +20,23 @@ PROG2_OBJ_DIR := $(BUILD_DIR)/$(PROG2)
 SHARED_SRCS := $(wildcard $(SHARED_SRC_DIR)/*.c)
 PROG1_SRCS := $(wildcard $(PROG1_SRC_DIR)/*.c) 
 PROG2_SRCS := $(wildcard $(PROG2_SRC_DIR)/*.c)
-# Caso o projeto cresca muito, pode ser conveniente compilar ficheiros objeto
-# antes de fazer o seu linking
+# Ficheiros objeto que serão "linked"
+# Fazemos isto para evitar compilações desnecessárias, consequente acelerando a
+# construção dos binários
 SHARED_OBJS := $(SHARED_SRCS:$(SHARED_SRC_DIR)/%.c=$(SHARED_OBJ_DIR)/%.o)
 PROG1_OBJS := $(SHARED_OBJS) $(PROG1_SRCS:$(PROG1_SRC_DIR)/%.c=$(PROG1_OBJ_DIR)/%.o)
 PROG2_OBJS := $(SHARED_OBJS) $(PROG2_SRCS:$(PROG2_SRC_DIR)/%.c=$(PROG2_OBJ_DIR)/%.o)
 
-# Ferramentas para processamento e compilação de ficheiros de código fonte
-CC := gcc
-FORMATTER = clang-format
+BUILD_TREE := $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) 
+BIN_TREE := $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2) 
 
+CC := gcc
 CFLAGS := -Wall -Wextra -lpthread
 # Uncomment bellow to enable debugging info 
 CFLAGS += -g
 
 
-all: clean_pipes $(BUILD_DIR) $(PROG1_OBJ_DIR) $(PROG2_OBJ_DIR) $(SHARED_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1) $(BIN_DIR)/$(PROG2)
+all: clean_pipes $(BUILD_TREE) $(BIN_TREE)
 
 broker: $(BUILD_DIR) $(SHARED_OBJ_DIR) $(PROG1_OBJ_DIR) $(BIN_DIR) $(BIN_DIR)/$(PROG1)
 

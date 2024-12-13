@@ -20,7 +20,7 @@ int processCmd(packet *p, char *input, char *username) {
   } else if (!strcmp(cmd, "subscribe")) {
     offset = nextword(input, offset, TAM_CMD_INPUT);
     if (offset == -1) {
-      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_SUB);
+      printf(FEED_ERR_FMT FEED_CMD_FMT_SUB);
       return -1;
     }
     if (wordlen(&input[offset]) >= TAM_NOME_TOPICO) {
@@ -34,7 +34,7 @@ int processCmd(packet *p, char *input, char *username) {
   } else if (!strcmp(cmd, "unsubscribe")) {
     offset = nextword(input, offset, TAM_CMD_INPUT);
     if (offset == -1) {
-      printf("%s%s\n", FEED_ERR_FMT, FEED_CMD_FMT_UNSUB);
+      printf(FEED_ERR_FMT FEED_CMD_FMT_UNSUB);
       return -1;
     }
     if (wordlen(&input[offset]) >= TAM_NOME_TOPICO) {
@@ -81,13 +81,12 @@ int processCmd(packet *p, char *input, char *username) {
     writeMsgPacket(p, P_TYPE_USER_MSG, duracao, topic, username, msg);
 
   } else if (!strcmp(cmd, "help")) {
-    printf("%s - Mostrar uma lista com todos os tópicos\n", FEED_CMD_FMT_TOPIC);
-    printf("%s - Enviar mensagem para um determinado tópico\n",
-           FEED_CMD_FMT_MSG);
-    printf("%s - Subscrever um determinado tópico\n", FEED_CMD_FMT_SUB);
-    printf("%s - Deixar de subscrever um determinado tópico\n",
-           FEED_CMD_FMT_UNSUB);
-    printf("%s - Sair\n", FEED_CMD_FMT_EXIT);
+    printf(FEED_CMD_FMT_TOPIC " - Mostrar uma lista com todos os tópicos\n");
+    printf(FEED_CMD_FMT_MSG " - Enviar mensagem para um determinado tópico\n");
+    printf(FEED_CMD_FMT_SUB " - Subscrever um determinado tópico\n");
+    printf(FEED_CMD_FMT_UNSUB
+           " - Deixar de subscrever um determinado tópico\n");
+    printf(FEED_CMD_FMT_EXIT " - Sair\n");
     return -1;
 
   } else {

@@ -38,6 +38,7 @@ typedef struct {
 
 /* Inicializa dados do manager */
 void initManData(managerData *d);
+void clearManData(managerData *d);
 
 int addUser(managerData *d, pid_t pid, char *name);
 int rmUser(managerData *d, pid_t pid);

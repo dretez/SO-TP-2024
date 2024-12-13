@@ -3,8 +3,9 @@
 
 #include "../../include/globals.h"
 #include "../../include/notificacoes.h"
-#include "../headers/emissor.h"
-#include "../headers/recetor.h"
+#include "emissor.h"
+#include "login.h"
+#include "recetor.h"
 
 void stopFeed();
 

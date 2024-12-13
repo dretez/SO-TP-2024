@@ -18,3 +18,10 @@ void initManData(managerData *d) {
   loadPMsgs(d, f);
   fclose(f);
 }
+
+void clearManData(managerData *d) {
+  for (int i = 0; i < d->ntopics; i++)
+    rmTopic(d, d->topics[i].name);
+  for (int i = 0; i < d->nusers; i++)
+    free(d->users[i].name);
+}

@@ -1,5 +1,4 @@
 #include "../headers/dadosThreads.h"
-#include <signal.h>
 
 int processCmd(packet *p, char *input);
 

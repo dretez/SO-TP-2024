@@ -1,7 +1,7 @@
 #include "../headers/manager.h"
+#include <pthread.h>
 
 int main() {
-
   if (access(FIFO_SRV, F_OK) == 0) {
     printf("[ERRO] Ja existe um servidor!\n");
     exit(3);
@@ -17,32 +17,23 @@ int main() {
   managerData d;
   initManData(&d);
 
-  int ext_err = 0;
-
   /* Dado o tamanho de um packet (~64KB) é preferível alocar um packet no heap
    * ao invés da stack de forma a evitar um stack overflow.
    * Outra solução seria diminuir o tamanho do buffer num packet, no entanto,
    * dado que um tamanho máximo para os usernames ainda não foi definido, é
    * impossível saber o quão grande um packet precisa de ser. */
-  packet *p_srv = (packet *)malloc(sizeof(packet));
-  if (p_srv == NULL) {
-    printf("[ERRO] Falha ao iniciar pacote de dados");
-    ext_err = 3;
-    goto exit1;
-  }
-
-  packet *p_admn = (packet *)malloc(sizeof(packet));
-  if (p_admn == NULL) {
-    printf("[ERRO] Falha ao iniciar pacote de dados");
-    ext_err = 3;
-    goto exit2;
-  }
-
-  packet *p_counter = (packet *)malloc(sizeof(packet));
-  if (p_srv == NULL) {
-    printf("[ERRO] Falha ao iniciar pacote de dados");
-    ext_err = 3;
-    goto exit3;
+  packet *p[TCOUNT + 1];
+  for (int i = 0; i < TCOUNT + 1; i++) {
+    packet *pp = (packet *)malloc(sizeof(packet));
+    if (pp == NULL) {
+      printf("[ERRO] Falha ao iniciar pacote de dados");
+      for (; i > 0; i--)
+        free(p[i - 1]);
+      close(fd);
+      unlink(FIFO_SRV);
+      exit(3);
+    }
+    p[i] = pp;
   }
 
   /***************************** DESATIVA SINAIS *****************************/
@@ -56,55 +47,49 @@ int main() {
 
   int cont = 1;
 
-  TDATA t[2];
-  t[0].p = p_admn;
-  t[0].cont = &cont;
-  t[0].fifo_srv = &fd;
-  t[1].p = p_counter;
-  t[1].cont = &cont;
-  t[1].fifo_srv = &fd;
-
-  pthread_t th[2];
-
-  pthread_create(&th[0], NULL, admin_thread, (void *)&t[0]);
-
-  pthread_create(&th[1], NULL, counter_thread, (void *)&t[1]);
+  TDATA t[TCOUNT];
+  pthread_t th[TCOUNT];
+  /* Array de funções do tipo "void *" que recebem um argumento do tipo "void *"
+   * Estas funções servem como ponto de início para as threads criadas */
+  void *(*routines[TCOUNT])(void *) = {admin_thread, counter_thread};
+  for (int i = 0; i < TCOUNT; i++) {
+    t[i].p = p[i + 1];
+    t[i].cont = &cont;
+    t[i].fifo_srv = &fd;
+    pthread_create(&th[i], NULL, routines[i], (void *)&t[i]);
+  }
 
   /********************************* SERVIDOR *********************************/
   while (1) {
-    read(fd, &p_srv->head, sizeof(packetHeader));
-    read(fd, &p_srv->buf, p_srv->head.tam_msg);
+    read(fd, &p[0]->head, sizeof(packetHeader));
+    read(fd, &p[0]->buf, p[0]->head.tam_msg);
 
     /*************************** PROCESSA PACOTE ***************************/
-    processPacket(p_srv, &d);
+    processPacket(p[0], &d);
 
     /************************ ENVIA PACOTE AOS FEEDS ************************/
-    if (answer(p_srv, &d))
-      goto exit;
+    if (answer(p[0], &d))
+      break;
   }
 
-exit:
+  /****************************** LIMPEZA E FIM ******************************/
+
   cont = 0;
-  pthread_join(th[0], NULL);
-  pthread_join(th[1], NULL);
+  for (int i = 0; i < TCOUNT; i++)
+    pthread_join(th[i], NULL);
   char *savedata = getenv(SAVEFILE);
   if (savedata == NULL) {
     printf("\"%s\" não está definido, as mensagens não serão armazenadas.\n",
            SAVEFILE);
   } else {
-    FILE *f = fopen(savedata, "wt");
+    FILE *f = fopen(savedata, "w");
     savePMsgs(d, f);
     fclose(f);
   }
-  // TODO: clean the managerData struct before exiting, as this struct contains
-  // allocated memory that needs to be free()'d
-  free(p_counter);
-exit3:
-  free(p_admn);
-exit2:
-  free(p_srv);
-exit1:
+  clearManData(&d);
+  for (int i = 0; i < TCOUNT; i++)
+    free(p[i]);
   close(fd);
   unlink(FIFO_SRV);
-  exit(ext_err);
+  exit(0);
 }

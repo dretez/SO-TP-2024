@@ -5,7 +5,6 @@ void write2feed(packet *p, pid_t pid);
 void sendPersistMsgs(packet *p, managerData *d, char *tname);
 
 int answer(packet *p, managerData *d) {
-
   switch (p->head.tipo_msg) {
   case P_TYPE_MNGR_NOANSW:
     break;

@@ -6,13 +6,13 @@
 #include "../../include/limites.h"
 #include "../../include/notificacoes.h"
 
-#define FEED_CMD_FMT_EXIT "exit\0"
-#define FEED_CMD_FMT_TOPIC "topics\0"
-#define FEED_CMD_FMT_SUB "subscribe <topico>\0"
-#define FEED_CMD_FMT_UNSUB "unsubscribe <topico>\0"
-#define FEED_CMD_FMT_MSG "msg <topico> <duracao> <mensagem>\0"
+#define FEED_CMD_FMT_EXIT "exit\n"
+#define FEED_CMD_FMT_TOPIC "topics\n"
+#define FEED_CMD_FMT_SUB "subscribe <topico>\n"
+#define FEED_CMD_FMT_UNSUB "unsubscribe <topico>\n"
+#define FEED_CMD_FMT_MSG "msg <topico> <duracao> <mensagem>\n"
 
-#define FEED_ERR_FMT "[ERRO] Formato esperado: \0"
+#define FEED_ERR_FMT "[ERRO] Formato esperado: "
 
 int processCmd(packet *p, char *input, char *username);
 

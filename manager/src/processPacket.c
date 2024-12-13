@@ -94,12 +94,12 @@ int processPacket(packet *p, managerData *d) {
   case P_TYPE_ADMN_RMUSR: {
     int upid = findUsrByName(d, p->buf);
     if (upid == -1) {
-      printf(NOTIF_ERR, "Utilizador não encontrado");
+      printf("[ERRO] Utilizador não encontrado\n");
       p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
       break;
     }
     if (rmUser(d, upid)) {
-      printf(NOTIF_ERR, "Falha ao remover utilizador");
+      printf("[ERRO] Falha ao remover utilizador\n");
       p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
       break;
     }
@@ -120,7 +120,7 @@ int processPacket(packet *p, managerData *d) {
   case P_TYPE_ADMN_SHWTOPIC: {
     topic *t = getTopic(d->topics, d->ntopics, p->buf);
     if (t == NULL) {
-      printf(NOTIF_ERR, "Tópico desconhecido");
+      printf("[ERRO] Tópico desconhecido\n");
       p->head.tipo_msg = P_TYPE_MNGR_NOANSW;
       break;
     }

@@ -6,6 +6,8 @@
 #include "../../include/communication.h"
 #include "dados.h"
 
+#define TCOUNT 2
+
 typedef struct {
   packet *p;
   int *cont;

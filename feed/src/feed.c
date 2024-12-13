@@ -5,7 +5,9 @@ int main(int argc, char *argv[]) {
   /****************** VERIFICAÇÃO E TRATAMENTO DE ARGUMENTOS ******************/
 
   if (argc != 2) {
-    printf("[SINTAXE] Numero de argumentos incorreto\n");
+    printf("[SINTAXE] Número de argumentos incorreto\n"
+           "Esperado: %s <username>\n",
+           argv[0]);
     exit(1);
   }
 
@@ -37,40 +39,8 @@ int main(int argc, char *argv[]) {
   }
 
   printf("A fazer login...\n");
-  writeSingleValPacket(p, P_TYPE_USER_HANDSHK, nome, strlen(nome) + 1);
-  p->head.pid = getpid();
-  write(fd, p, packetSize(*p));
-
-  read(fd_cli, &p->head, sizeof(packetHeader));
-  read(fd_cli, &p->buf, p->head.tam_msg);
-
-  switch (p->head.tipo_msg) {
-  case P_TYPE_MNGR_SUCCESS: {
-    int scsCode;
-    memcpy(&scsCode, p->buf, sizeof(int));
-    if (scsCode == P_SCS_HANDSHK)
-      break;
-    printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
+  if (login(p, nome, fd, fd_cli))
     goto exit;
-  }
-  case P_TYPE_MNGR_ERROR: {
-    int errCode;
-    memcpy(&errCode, p->buf, sizeof(int));
-
-    switch (errCode) {
-    case P_ERR_ALREADY_LOGGED:
-      printf(NOTIF_ERR, NOTIF_ALREADY_LOGGED);
-      break;
-    default:
-      printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
-      break;
-    }
-    goto exit;
-  }
-  default:
-    printf(NOTIF_ERR, NOTIF_ERR_LOGIN);
-    goto exit;
-  }
 
   /***************************** DESATIVA SINAIS *****************************/
 
@@ -87,7 +57,9 @@ int main(int argc, char *argv[]) {
   sigaction(SIGINT, &sa, NULL);
 
   /******************** INDICAR EXISTÊNCIA DO COMANDO HELP ********************/
-  // TODO:
+
+  printf("Bem vindo! Utilize o comado \"help\" para obter uma lista de "
+         "comandos\n");
 
   /****************** REALIZA O ENVIO E RECEÇÃO DE MENSAGEMS ******************/
 
